@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>المختبر المالي</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Tahoma,sans-serif;background:#0f172a;color:#e2e8f0;min-height:100vh}
+a,button{font-family:inherit}
+
+/* NAV */
+header{background:#1e293b;border-bottom:1px solid #334155;padding:12px 20px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100}
+header h1{font-size:1.1rem;color:#f59e0b;font-weight:700}
+#backBtn{display:none;background:#334155;border:none;color:#94a3b8;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:0.85rem}
+#backBtn:hover{background:#475569;color:#e2e8f0}
+
+/* HUB */
+#hub{padding:24px 20px}
+#hub h2{font-size:1rem;color:#64748b;margin-bottom:20px}
+.hub-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.hcard{background:#1e293b;border:1px solid #334155;border-radius:10px;padding:18px;cursor:pointer;transition:all .2s}
+.hcard:hover{border-color:#f59e0b;background:#243047}
+.hcard-icon{font-size:1.8rem;margin-bottom:10px}
+.hcard-title{font-size:0.97rem;font-weight:700;margin-bottom:4px}
+.hcard-desc{font-size:0.78rem;color:#64748b;line-height:1.4}
+
+/* PANEL */
+.panel{display:none;padding:20px;max-width:960px;margin:0 auto;animation:fadeIn .25s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.panel-title{font-size:1.1rem;font-weight:700;color:#f59e0b;margin-bottom:20px;padding-bottom:10px;border-bottom:1px solid #334155}
+
+/* CARDS */
+.card{background:#1e293b;border:1px solid #334155;border-radius:10px;padding:18px;margin-bottom:16px}
+.card h3{font-size:0.9rem;color:#94a3b8;margin-bottom:14px;font-weight:600}
+
+/* FORM */
+.fg{margin-bottom:12px}
+.fg label{display:block;font-size:0.78rem;color:#94a3b8;margin-bottom:4px}
+.inp{width:100%;height:40px;background:#0f172a;border:1px solid #334155;border-radius:7px;color:#e2e8f0;padding:0 12px;font-size:0.9rem;outline:none;font-family:inherit}
+.inp:focus{border-color:#f59e0b}
+.inp option{background:#1e293b}
+.btn{width:100%;height:42px;background:#f59e0b;color:#0f172a;border:none;border-radius:7px;font-weight:700;cursor:pointer;font-size:0.95rem;transition:.2s}
+.btn:hover{background:#fbbf24}
+.btn-sm{padding:5px 14px;height:32px;font-size:0.8rem;border:none;border-radius:6px;cursor:pointer;font-weight:600;transition:.2s}
+.btn-g{background:rgba(0,200,120,.15);color:#00c878;border:1px solid rgba(0,200,120,.3)}
+.btn-g:hover{background:#00c878;color:#0f172a}
+.btn-r{background:rgba(239,68,68,.15);color:#ef4444;border:1px solid rgba(239,68,68,.3)}
+.btn-r:hover{background:#ef4444;color:white}
+.btn-b{background:rgba(59,130,246,.15);color:#3b82f6;border:1px solid rgba(59,130,246,.3)}
+.btn-b:hover{background:#3b82f6;color:white}
+
+/* GRID */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+@media(max-width:600px){.g2,.g3{grid-template-columns:1fr}}
+
+/* RESULT */
+.res{background:#0f172a;border:1px dashed #f59e0b;border-radius:8px;padding:14px;margin-top:12px;line-height:2;font-size:0.88rem;color:#fbbf24;display:none}
+.stat{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #1e293b;font-size:0.86rem}
+.stat:last-child{border:none}
+.stat-l{color:#94a3b8}
+.stat-v{font-weight:700;font-family:monospace}
+.g{color:#00c878} .r{color:#ef4444} .gold{color:#f59e0b} .b{color:#60a5fa}
+
+/* TABLE */
+.tbl{width:100%;border-collapse:collapse;font-size:0.82rem}
+.tbl th{text-align:right;padding:8px 10px;color:#64748b;font-weight:600;border-bottom:1px solid #334155;font-size:0.75rem;white-space:nowrap}
+.tbl td{padding:8px 10px;border-bottom:1px solid #1e293b}
+.tbl tr:hover td{background:#1e293b}
+.scroll{overflow-x:auto}
+
+/* TABS */
+.tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+.tab{padding:6px 14px;border-radius:6px;background:#0f172a;border:1px solid #334155;color:#94a3b8;cursor:pointer;font-size:0.82rem;transition:.2s}
+.tab.on{background:#f59e0b;color:#0f172a;border-color:#f59e0b;font-weight:700}
+
+/* STOCKS */
+.stk{background:#0f172a;border:1px solid #334155;border-radius:7px;padding:9px 12px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:.15s;margin-bottom:5px}
+.stk:hover,.stk.on{border-color:#f59e0b;background:#1a2540}
+.stk-sym{font-family:monospace;font-size:0.72rem;color:#f59e0b;width:44px;flex-shrink:0}
+.stk-nm{flex:1;font-size:0.82rem}
+.stk-px{font-family:monospace;font-size:0.82rem}
+.badge{font-family:monospace;font-size:0.7rem;padding:2px 7px;border-radius:3px}
+.u{background:rgba(0,200,120,.12);color:#00c878}
+.d{background:rgba(239,68,68,.12);color:#ef4444}
+
+/* ATM */
+.atm{background:#021a0d;border:3px solid #1c5c2a;border-radius:14px;padding:20px;font-family:monospace;color:#00c878;max-width:320px}
+.atm-ttl{font-size:0.6rem;letter-spacing:2px;opacity:.5;margin-bottom:12px}
+.atm-bl-lbl{font-size:0.6rem;opacity:.5}
+.atm-bal{font-size:1.5rem;font-weight:700;margin-bottom:14px}
+.atm-screen{background:rgba(0,200,80,.06);border:1px solid rgba(0,200,80,.15);border-radius:5px;padding:7px 10px;min-height:32px;font-size:.95rem;letter-spacing:2px;margin-bottom:6px}
+.atm-msg{font-size:.68rem;opacity:.55;min-height:16px}
+.numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:12px}
+.nk{height:46px;background:#0a2a14;border:1px solid #1a4a24;border-radius:6px;color:#00c878;font-size:1rem;font-weight:700;cursor:pointer;transition:.1s;font-family:monospace}
+.nk:hover{background:#0d3a1a}
+.nk:active{transform:scale(.92);background:#00c878;color:#021a0d}
+.nk-c{color:#ef4444}
+.atm-btns{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}
+
+/* BONDS */
+.bond{background:#0f172a;border:1px solid #334155;border-radius:7px;padding:11px 13px;margin-bottom:7px;cursor:pointer;transition:.15s}
+.bond:hover{border-color:#3b82f6;background:#131e30}
+.bond-id{font-family:monospace;font-size:.65rem;color:#60a5fa;letter-spacing:1px}
+.bond-nm{font-size:.88rem;font-weight:700;margin:3px 0}
+.bond-row{display:flex;gap:14px;flex-wrap:wrap;margin-top:6px}
+.bond-s{font-family:monospace;font-size:.7rem;color:#64748b}
+.bond-s span{color:#e2e8f0}
+
+/* MINI STATS */
+.mst{background:#0f172a;border-radius:8px;padding:12px;text-align:center}
+.mst-l{font-size:.72rem;color:#64748b;margin-bottom:5px}
+.mst-v{font-family:monospace;font-size:1.05rem;font-weight:700}
+
+/* CHART BOX */
+.ch{height:200px;position:relative;margin-top:12px}
+
+/* TOPBAR */
+.topbar{background:#0f172a;border:1px solid #334155;border-radius:8px;padding:10px 14px;display:flex;gap:20px;margin-bottom:14px;flex-wrap:wrap}
+.ti .ti-l{font-size:.72rem;color:#64748b}
+.ti .ti-v{font-family:monospace;font-size:.95rem;font-weight:700;color:#f59e0b}
+
+.msg{padding:7px 12px;border-radius:6px;font-size:.82rem;margin-top:8px;display:none}
+.msg-ok{background:rgba(0,200,120,.12);color:#00c878;border:1px solid rgba(0,200,120,.2)}
+.msg-er{background:rgba(239,68,68,.12);color:#ef4444;border:1px solid rgba(239,68,68,.2)}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>📊 المختبر المالي</h1>
+  <button id="backBtn" onclick="goHome()">← رجوع</button>
+</header>
+
+<!-- HUB -->
+<div id="hub">
+  <div style="padding:20px 20px 8px;color:#64748b;font-size:.9rem">اختر الأداة المطلوبة:</div>
+  <div class="hub-grid" style="padding:0 20px 30px">
+    <div class="hcard" onclick="open_('loans')">
+      <div class="hcard-icon">🏦</div>
+      <div class="hcard-title">حاسبة القروض</div>
+      <div class="hcard-desc">القسط الشهري وجدول الاستهلاك الكامل</div>
+    </div>
+    <div class="hcard" onclick="open_('savings')">
+      <div class="hcard-icon">💰</div>
+      <div class="hcard-title">حاسبة التوفير</div>
+      <div class="hcard-desc">نمو المدخرات مع الفائدة المركبة</div>
+    </div>
+    <div class="hcard" onclick="open_('fx')">
+      <div class="hcard-icon">💱</div>
+      <div class="hcard-title">محول العملات</div>
+      <div class="hcard-desc">تحويل بين 8 عملات رئيسية والدينار</div>
+    </div>
+    <div class="hcard" onclick="open_('stocks')">
+      <div class="hcard-icon">📈</div>
+      <div class="hcard-title">محاكاة البورصة</div>
+      <div class="hcard-desc">تداول أسهم برصيد افتراضي حي</div>
+    </div>
+    <div class="hcard" onclick="open_('acct')">
+      <div class="hcard-icon">📒</div>
+      <div class="hcard-title">القيود المحاسبية</div>
+      <div class="hcard-desc">اليومية ودفتر الأستاذ وميزان المراجعة</div>
+    </div>
+    <div class="hcard" onclick="open_('atm')">
+      <div class="hcard-icon">🏧</div>
+      <div class="hcard-title">محاكاة الصراف ATM</div>
+      <div class="hcard-desc">سحب وإيداع واستعلام رصيد</div>
+    </div>
+    <div class="hcard" onclick="open_('bonds')">
+      <div class="hcard-icon">📜</div>
+      <div class="hcard-title">سوق السندات</div>
+      <div class="hcard-desc">سندات حكومية وشركات — حساب YTM وسوق الديون</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TOOL: LOANS ===== -->
+<div class="panel" id="p-loans">
+  <div class="panel-title">🏦 حاسبة القروض المصرفية</div>
+  <div class="g2">
+    <div class="card">
+      <div class="fg"><label>مبلغ القرض (د.ع)</label><input class="inp" type="number" id="l-amt" value="10000000"></div>
+      <div class="fg"><label>الفائدة السنوية (%)</label><input class="inp" type="number" id="l-rate" value="8" step="0.5"></div>
+      <div class="fg"><label>المدة (سنوات)</label><input class="inp" type="number" id="l-yrs" value="5"></div>
+      <div class="fg"><label>نوع السداد</label>
+        <select class="inp" id="l-type">
+          <option value="fix">قسط ثابت</option>
+          <option value="lin">قسط تناقصي</option>
+        </select>
+      </div>
+      <button class="btn" onclick="calcLoan()">احسب القرض</button>
+      <div class="res" id="l-res"></div>
+    </div>
+    <div class="card">
+      <h3>مخطط الاستهلاك</h3>
+      <div class="ch"><canvas id="lCh"></canvas></div>
+    </div>
+  </div>
+  <div class="card" id="l-tbl-c" style="display:none">
+    <h3>جدول الاستهلاك — أول 24 شهر</h3>
+    <div class="scroll">
+      <table class="tbl"><thead><tr><th>الشهر</th><th>القسط</th><th>الفائدة</th><th>الأصل</th><th>المتبقي</th></tr></thead>
+      <tbody id="l-tbody"></tbody></table>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TOOL: SAVINGS ===== -->
+<div class="panel" id="p-savings">
+  <div class="panel-title">💰 حاسبة التوفير والاستثمار</div>
+  <div class="g2">
+    <div class="card">
+      <div class="fg"><label>الإيداع الأولي (د.ع)</label><input class="inp" type="number" id="s-init" value="5000000"></div>
+      <div class="fg"><label>الإيداع الشهري (د.ع)</label><input class="inp" type="number" id="s-mo" value="250000"></div>
+      <div class="fg"><label>العائد السنوي (%)</label><input class="inp" type="number" id="s-rate" value="12" step="0.5"></div>
+      <div class="fg"><label>المدة (سنوات)</label><input class="inp" type="number" id="s-yrs" value="10"></div>
+      <button class="btn" onclick="calcSav()">احسب النمو</button>
+    </div>
+    <div class="card">
+      <h3>نمو المدخرات</h3>
+      <div class="ch"><canvas id="sCh"></canvas></div>
+    </div>
+  </div>
+  <div class="card" id="s-res" style="display:none">
+    <div class="g3" id="s-stats"></div>
+  </div>
+</div>
+
+<!-- ===== TOOL: FX ===== -->
+<div class="panel" id="p-fx">
+  <div class="panel-title">💱 محول العملات</div>
+  <div class="g2">
+    <div class="card">
+      <div class="fg"><label>المبلغ</label><input class="inp" type="number" id="fx-a" value="100" oninput="calcFX()"></div>
+      <div class="g2" style="gap:10px;margin-bottom:12px">
+        <div class="fg" style="margin:0"><label>من</label><select class="inp" id="fx-f" onchange="calcFX()">
+          <option>USD</option><option>IQD</option><option>EUR</option><option>GBP</option>
+          <option>SAR</option><option>AED</option><option>TRY</option><option>KWD</option>
+        </select></div>
+        <div class="fg" style="margin:0"><label>إلى</label><select class="inp" id="fx-t" onchange="calcFX()">
+          <option>IQD</option><option>USD</option><option>EUR</option><option>GBP</option>
+          <option>SAR</option><option>AED</option><option>TRY</option><option>KWD</option>
+        </select></div>
+      </div>
+      <div class="card" style="text-align:center;padding:20px">
+        <div style="color:#64748b;font-size:.78rem;margin-bottom:6px">النتيجة</div>
+        <div id="fx-res" style="font-size:1.9rem;font-weight:700;color:#f59e0b;font-family:monospace">—</div>
+        <div id="fx-rate" style="font-size:.75rem;color:#64748b;margin-top:5px">—</div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>أسعار مقابل الدولار</h3>
+      <table class="tbl"><thead><tr><th>العملة</th><th>شراء</th><th>بيع</th></tr></thead>
+      <tbody id="fx-tbl"></tbody></table>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TOOL: STOCKS ===== -->
+<div class="panel" id="p-stocks">
+  <div class="panel-title">📈 محاكاة البورصة العراقية</div>
+  <div class="topbar">
+    <div class="ti"><div class="ti-l">الرصيد النقدي</div><div class="ti-v" id="st-cash">10,000,000</div></div>
+    <div class="ti"><div class="ti-l">قيمة المحفظة</div><div class="ti-v" id="st-pv">0</div></div>
+    <div class="ti"><div class="ti-l">الربح / الخسارة</div><div class="ti-v" id="st-pnl" style="color:#e2e8f0">0</div></div>
+  </div>
+  <div class="g2">
+    <div>
+      <div class="card" style="padding:14px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+          <div id="st-name" style="font-weight:700">—</div>
+          <div id="st-px" style="font-family:monospace;font-size:1.2rem;font-weight:700;color:#f59e0b">—</div>
+        </div>
+        <div id="st-chg" style="font-size:.78rem;margin-bottom:8px"></div>
+        <div class="ch"><canvas id="stCh"></canvas></div>
+        <div style="display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap">
+          <label style="font-size:.8rem;color:#64748b">الكمية:</label>
+          <input type="number" id="st-qty" value="100" min="1" oninput="updTrade()"
+            style="width:70px;height:34px;background:#0f172a;border:1px solid #334155;border-radius:5px;color:#e2e8f0;padding:0 8px;font-family:monospace;outline:none">
+          <span id="st-ttl" style="flex:1;font-size:.78rem;color:#64748b;font-family:monospace">—</span>
+          <button class="btn-sm btn-g" onclick="stTrade('buy')">شراء</button>
+          <button class="btn-sm btn-r" onclick="stTrade('sell')">بيع</button>
+        </div>
+      </div>
+      <div class="card" style="padding:12px">
+        <div style="font-size:.8rem;color:#64748b;margin-bottom:8px">محفظتي</div>
+        <div id="st-hold" style="font-size:.82rem;color:#64748b">لا توجد أسهم</div>
+      </div>
+    </div>
+    <div class="card" style="padding:12px">
+      <div style="font-size:.8rem;color:#64748b;margin-bottom:8px">الأسهم</div>
+      <div id="st-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TOOL: ACCOUNTING ===== -->
+<div class="panel" id="p-acct">
+  <div class="panel-title">📒 النظام المحاسبي</div>
+  <div class="tabs">
+    <div class="tab on" onclick="switchTab('jrn')">دفتر اليومية</div>
+    <div class="tab" onclick="switchTab('led')">دفتر الأستاذ</div>
+    <div class="tab" onclick="switchTab('tri')">ميزان المراجعة</div>
+  </div>
+
+  <div id="tab-jrn">
+    <div class="card">
+      <div class="g2" style="margin-bottom:12px">
+        <div class="fg"><label>التاريخ</label><input class="inp" type="date" id="j-dt"></div>
+        <div class="fg"><label>البيان</label><input class="inp" type="text" id="j-ds" placeholder="وصف العملية..."></div>
+      </div>
+      <div class="scroll">
+        <table class="tbl" id="jt" style="margin-bottom:10px">
+          <thead><tr><th style="width:44%">الحساب</th><th style="width:25%">مدين</th><th style="width:25%">دائن</th><th style="width:6%"></th></tr></thead>
+          <tbody id="j-rows"></tbody>
+        </table>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <button class="btn-sm btn-b" onclick="addRow()">+ سطر</button>
+        <span id="j-bal" style="font-family:monospace;font-size:.8rem;color:#64748b">مدين: 0 | دائن: 0</span>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn" style="flex:1" onclick="postJ()">✅ ترحيل القيد</button>
+        <button class="btn-sm btn-r" style="flex:.3;height:42px" onclick="clearAll()">🗑️ حذف الكل</button>
+      </div>
+      <div class="msg" id="j-msg"></div>
+    </div>
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;margin-bottom:10px">
+        <span style="font-size:.88rem;font-weight:700">سجل القيود</span>
+        <span id="j-cnt" style="font-family:monospace;font-size:.78rem;color:#64748b">0</span>
+      </div>
+      <div class="scroll">
+        <table class="tbl"><thead><tr><th>التاريخ</th><th>البيان</th><th>الحساب</th><th>مدين</th><th>دائن</th></tr></thead>
+        <tbody id="j-log"></tbody></table>
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-led" style="display:none">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <span style="font-weight:700">دفتر الأستاذ (T-Accounts)</span>
+      <button class="btn-sm btn-b" onclick="renderLed()">تحديث</button>
+    </div>
+    <div id="led-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px"></div>
+  </div>
+
+  <div id="tab-tri" style="display:none">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <span style="font-weight:700">ميزان المراجعة</span>
+      <button class="btn-sm btn-b" onclick="renderTri()">فحص</button>
+    </div>
+    <div class="scroll">
+      <table class="tbl">
+        <thead><tr><th>الحساب</th><th>مدين</th><th>دائن</th></tr></thead>
+        <tbody id="tri-body"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TOOL: ATM ===== -->
+<div class="panel" id="p-atm">
+  <div class="panel-title">🏧 محاكاة الصراف الآلي</div>
+  <div style="display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start">
+    <div class="atm">
+      <div class="atm-ttl">◈ RAFIDAIN VIRTUAL BANK ◈</div>
+      <div class="atm-bl-lbl">الرصيد المتاح</div>
+      <div class="atm-bal" id="atm-bal">5,000,000 د.ع</div>
+      <div class="atm-screen" id="atm-disp"></div>
+      <div class="atm-msg" id="atm-msg">أدخل المبلغ واختر العملية</div>
+      <div id="atm-hist" style="font-size:.65rem;opacity:.4;margin-top:8px;border-top:1px solid rgba(0,200,80,.15);padding-top:7px;min-height:24px"></div>
+    </div>
+    <div>
+      <div class="numpad" style="max-width:220px">
+        <button class="nk" onclick="ak('1')">1</button><button class="nk" onclick="ak('2')">2</button><button class="nk" onclick="ak('3')">3</button>
+        <button class="nk" onclick="ak('4')">4</button><button class="nk" onclick="ak('5')">5</button><button class="nk" onclick="ak('6')">6</button>
+        <button class="nk" onclick="ak('7')">7</button><button class="nk" onclick="ak('8')">8</button><button class="nk" onclick="ak('9')">9</button>
+        <button class="nk nk-c" onclick="ak('C')">C</button><button class="nk" onclick="ak('0')">0</button><button class="nk" onclick="ak('000')">000</button>
+      </div>
+      <div class="atm-btns" style="max-width:220px;margin-top:8px">
+        <button class="btn-sm btn-g" style="height:40px" onclick="ado('dep')">⬇ إيداع</button>
+        <button class="btn-sm btn-r" style="height:40px" onclick="ado('wdr')">⬆ سحب</button>
+      </div>
+      <button class="btn-sm btn-b" style="width:100%;height:36px;margin-top:6px;max-width:220px" onclick="ado('bal')">💳 استعلام رصيد</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TOOL: BONDS ===== -->
+<div class="panel" id="p-bonds">
+  <div class="panel-title">📜 سوق السندات والأوراق المالية</div>
+  <div class="topbar">
+    <div class="ti"><div class="ti-l">الرصيد النقدي</div><div class="ti-v" id="b-cash">20,000,000</div></div>
+    <div class="ti"><div class="ti-l">قيمة السندات</div><div class="ti-v" id="b-val">0</div></div>
+    <div class="ti"><div class="ti-l">الدخل الثابت السنوي</div><div class="ti-v" id="b-inc">0</div></div>
+  </div>
+  <div class="g2">
+    <div>
+      <div class="card" style="padding:14px;margin-bottom:12px">
+        <h3>السندات المتاحة</h3>
+        <div id="b-list"></div>
+      </div>
+      <div class="card" style="padding:14px">
+        <h3>🧮 حاسبة YTM (العائد حتى الاستحقاق)</h3>
+        <div class="fg"><label>القيمة الاسمية</label><input class="inp" type="number" id="y-face" value="1000000"></div>
+        <div class="fg"><label>سعر السوق</label><input class="inp" type="number" id="y-px" value="950000"></div>
+        <div class="fg"><label>معدل الكوبون (%)</label><input class="inp" type="number" id="y-cpn" value="8" step="0.5"></div>
+        <div class="fg"><label>سنوات حتى الاستحقاق</label><input class="inp" type="number" id="y-yrs" value="5"></div>
+        <button class="btn" onclick="calcYTM()">احسب YTM</button>
+        <div class="res" id="y-res"></div>
+      </div>
+    </div>
+    <div>
+      <div class="card" style="padding:14px;margin-bottom:12px">
+        <h3>سندات في محفظتي</h3>
+        <div id="b-hold" style="color:#64748b;font-size:.83rem">لا توجد سندات</div>
+      </div>
+      <div class="card" style="padding:14px">
+        <h3>علاقة السعر والعائد</h3>
+        <div class="ch"><canvas id="bCh"></canvas></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// ─── NAV ───
+var CHS = {};
+var stTmr = null;
+
+function open_(id) {
+  document.getElementById('hub').style.display = 'none';
+  document.querySelectorAll('.panel').forEach(function(p){ p.style.display='none'; });
+  document.getElementById('p-'+id).style.display = 'block';
+  document.getElementById('backBtn').style.display = 'inline-block';
+  if (id==='stocks')  { initStocks(); }
+  if (id==='fx')      { buildFXTable(); calcFX(); }
+  if (id==='bonds')   { renderBonds(); drawBondCurve(); }
+  if (id==='acct')    { var d=document.getElementById('j-dt'); if(!d.value) d.value=new Date().toISOString().split('T')[0]; if(!document.getElementById('j-rows').children.length){addRow();addRow();} renderJLog(); }
+  window.scrollTo(0,0);
+}
+function goHome() {
+  document.querySelectorAll('.panel').forEach(function(p){ p.style.display='none'; });
+  document.getElementById('hub').style.display = 'block';
+  document.getElementById('backBtn').style.display = 'none';
+  if(stTmr){ clearInterval(stTmr); stTmr=null; }
+  window.scrollTo(0,0);
+}
+
+// ─── LOANS ───
+function calcLoan() {
+  var P=parseFloat(document.getElementById('l-amt').value)||0;
+  var ar=parseFloat(document.getElementById('l-rate').value)||0;
+  var yrs=parseFloat(document.getElementById('l-yrs').value)||0;
+  var type=document.getElementById('l-type').value;
+  var r=ar/100/12, n=yrs*12;
+  if(!P||!n) return;
+  var sched=[], bal=P;
+  for(var i=1;i<=n;i++){
+    var interest=bal*r, pmt, prin;
+    if(type==='fix'){ pmt=r>0?P*r/(1-Math.pow(1+r,-n)):P/n; prin=pmt-interest; }
+    else { prin=P/n; pmt=prin+interest; }
+    bal-=prin;
+    sched.push({m:i,pmt:Math.round(pmt),int:Math.round(interest),prin:Math.round(prin),bal:Math.max(0,Math.round(bal))});
+  }
+  var totInt=sched.reduce(function(s,x){return s+x.int;},0);
+  var totPaid=sched.reduce(function(s,x){return s+x.pmt;},0);
+  document.getElementById('l-res').innerHTML=
+    '<div class="stat"><span class="stat-l">القسط الأول</span><span class="stat-v gold">'+sched[0].pmt.toLocaleString()+' د.ع</span></div>'+
+    '<div class="stat"><span class="stat-l">إجمالي الفوائد</span><span class="stat-v r">'+totInt.toLocaleString()+' د.ع</span></div>'+
+    '<div class="stat"><span class="stat-l">إجمالي المدفوعات</span><span class="stat-v">'+totPaid.toLocaleString()+' د.ع</span></div>'+
+    '<div class="stat"><span class="stat-l">كلفة الفائدة الفعلية</span><span class="stat-v">'+((totInt/P)*100).toFixed(2)+'%</span></div>';
+  document.getElementById('l-res').style.display='block';
+  document.getElementById('l-tbody').innerHTML=sched.slice(0,24).map(function(x){
+    return '<tr><td>'+x.m+'</td><td>'+x.pmt.toLocaleString()+'</td><td style="color:#ef4444">'+x.int.toLocaleString()+'</td><td style="color:#00c878">'+x.prin.toLocaleString()+'</td><td>'+x.bal.toLocaleString()+'</td></tr>';
+  }).join('');
+  document.getElementById('l-tbl-c').style.display='block';
+  var yBal=sched.filter(function(x){return x.m%12===0;}).map(function(x){return x.bal;});
+  var yInt=sched.filter(function(x){return x.m%12===0;}).map(function(x){return x.int*12;});
+  var ctx=document.getElementById('lCh').getContext('2d');
+  if(CHS.loan) CHS.loan.destroy();
+  CHS.loan=new Chart(ctx,{type:'line',data:{labels:yBal.map(function(_,i){return 'سنة '+(i+1);}),datasets:[
+    {label:'الرصيد',data:yBal,borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,.1)',fill:true,tension:.4,pointRadius:3},
+    {label:'الفوائد',data:yInt,borderColor:'#ef4444',backgroundColor:'rgba(239,68,68,.05)',fill:true,tension:.4,pointRadius:3}
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#94a3b8',font:{size:10}}}},scales:{x:{ticks:{color:'#475569',font:{size:9}}},y:{ticks:{color:'#475569',font:{size:9},callback:function(v){return v.toLocaleString();}},grid:{color:'rgba(255,255,255,.04)'}}}}});
+}
+
+// ─── SAVINGS ───
+function calcSav() {
+  var init=parseFloat(document.getElementById('s-init').value)||0;
+  var mo=parseFloat(document.getElementById('s-mo').value)||0;
+  var ar=parseFloat(document.getElementById('s-rate').value)/100;
+  var yrs=parseInt(document.getElementById('s-yrs').value)||0;
+  var r=ar/12, bal=init, totInv=init, yVals=[init], yInv=[init];
+  for(var m=1;m<=yrs*12;m++){
+    bal=(bal+mo)*(1+r); totInv+=mo;
+    if(m%12===0){yVals.push(Math.round(bal));yInv.push(Math.round(totInv));}
+  }
+  var earned=bal-totInv, roi=(earned/totInv)*100;
+  document.getElementById('s-stats').innerHTML=
+    '<div class="mst"><div class="mst-l">القيمة المستقبلية</div><div class="mst-v g">'+Math.round(bal).toLocaleString()+' د.ع</div></div>'+
+    '<div class="mst"><div class="mst-l">إجمالي الإيداعات</div><div class="mst-v">'+Math.round(totInv).toLocaleString()+' د.ع</div></div>'+
+    '<div class="mst"><div class="mst-l">الأرباح المكتسبة</div><div class="mst-v gold">'+Math.round(earned).toLocaleString()+' د.ع</div></div>';
+  document.getElementById('s-res').style.display='block';
+  var ctx=document.getElementById('sCh').getContext('2d');
+  if(CHS.sav) CHS.sav.destroy();
+  CHS.sav=new Chart(ctx,{type:'bar',data:{labels:yVals.map(function(_,i){return 'سنة '+i;}),datasets:[
+    {label:'الإيداعات',data:yInv,backgroundColor:'rgba(59,130,246,.5)',borderRadius:3},
+    {label:'الأرباح',data:yVals.map(function(v,i){return Math.max(0,v-yInv[i]);}),backgroundColor:'rgba(0,200,120,.55)',borderRadius:3}
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#94a3b8',font:{size:10}}}},scales:{x:{stacked:true,ticks:{color:'#475569',font:{size:9}}},y:{stacked:true,ticks:{color:'#475569',font:{size:9},callback:function(v){return v.toLocaleString();}},grid:{color:'rgba(255,255,255,.04)'}}}}});
+}
+
+// ─── FX ───
+var FX={USD:1,IQD:1310,EUR:0.92,GBP:0.79,SAR:3.75,AED:3.67,TRY:32.4,KWD:0.308};
+var FXN={USD:'دولار',IQD:'دينار عراقي',EUR:'يورو',GBP:'جنيه إسترليني',SAR:'ريال سعودي',AED:'درهم إماراتي',TRY:'ليرة تركية',KWD:'دينار كويتي'};
+function calcFX(){
+  var amt=parseFloat(document.getElementById('fx-a').value)||0;
+  var f=document.getElementById('fx-f').value, t=document.getElementById('fx-t').value;
+  var res=(amt/FX[f])*FX[t], rate=FX[t]/FX[f];
+  document.getElementById('fx-res').textContent=res.toLocaleString(undefined,{maximumFractionDigits:2})+' '+t;
+  document.getElementById('fx-rate').textContent='1 '+f+' = '+rate.toFixed(4)+' '+t;
+}
+function buildFXTable(){
+  document.getElementById('fx-tbl').innerHTML=Object.keys(FX).filter(function(c){return c!=='USD';}).map(function(c){
+    return '<tr><td>'+FXN[c]+' ('+c+')</td><td style="color:#00c878;font-family:monospace">'+(FX[c]*.995).toFixed(4)+'</td><td style="color:#ef4444;font-family:monospace">'+(FX[c]*1.005).toFixed(4)+'</td></tr>';
+  }).join('');
+}
+
+// ─── STOCKS ───
+var STK=[
+  {id:1,sym:'KFHL',name:'مستشفى الكفيل',price:5200,c:0,h:[5100,5150,5200]},
+  {id:2,sym:'BGD', name:'مصرف بغداد',   price:1250,c:0,h:[1300,1280,1250]},
+  {id:3,sym:'ASIA',name:'آسيا سيل',      price:8900,c:0,h:[8600,8750,8900]},
+  {id:4,sym:'ZAIN',name:'زين العراق',    price:4100,c:0,h:[4000,4050,4100]},
+  {id:5,sym:'MOIL',name:'نفط الوسط',     price:15600,c:0,h:[16000,15800,15600]},
+  {id:6,sym:'IAIR',name:'الخطوط الجوية', price:3200,c:0,h:[3200,3180,3200]},
+  {id:7,sym:'GOLD',name:'الذهب',          price:485000,c:0,h:[465000,475000,485000]}
+];
+var stSt={cash:10000000,port:[],ai:0};
+
+function initStocks(){
+  renderStkList(); selStk(0); updStUI();
+  if(!stTmr) stTmr=setInterval(function(){
+    STK.forEach(function(s){
+      var old=s.price, v=s.sym==='GOLD'?.006:.022;
+      s.price=Math.max(10,Math.round(s.price*(1+(Math.random()-.47)*v)));
+      s.c=parseFloat(((s.price-old)/old*100).toFixed(2));
+      s.h.push(s.price); if(s.h.length>30) s.h.shift();
+    });
+    renderStkList();
+    var a=STK[stSt.ai];
+    document.getElementById('st-px').textContent=a.price.toLocaleString()+' د.ع';
+    var ce=document.getElementById('st-chg');
+    ce.textContent=(a.c>0?'+':'')+a.c+'%'; ce.style.color=a.c>=0?'#00c878':'#ef4444';
+    if(CHS.stk){CHS.stk.data.datasets[0].data=a.h;CHS.stk.data.datasets[0].borderColor=a.c>=0?'#00c878':'#ef4444';CHS.stk.update('none');}
+    updTrade(); updStUI();
+  },3500);
+}
+function renderStkList(){
+  document.getElementById('st-list').innerHTML=STK.map(function(s,i){
+    return '<div class="stk '+(i===stSt.ai?'on':'')+'" onclick="selStk('+i+')">'
+      +'<span class="stk-sym">'+s.sym+'</span>'
+      +'<span class="stk-nm">'+s.name+'</span>'
+      +'<span class="stk-px">'+s.price.toLocaleString()+'</span>'
+      +'<span class="badge '+(s.c>=0?'u':'d')+'">'+(s.c>0?'+':'')+s.c+'%</span>'
+      +'</div>';
+  }).join('');
+}
+function selStk(idx){
+  stSt.ai=idx; var s=STK[idx];
+  document.getElementById('st-name').textContent=s.name+' ('+s.sym+')';
+  document.getElementById('st-px').textContent=s.price.toLocaleString()+' د.ع';
+  var ce=document.getElementById('st-chg');
+  ce.textContent=(s.c>0?'+':'')+s.c+'%'; ce.style.color=s.c>=0?'#00c878':'#ef4444';
+  updTrade();
+  var ctx=document.getElementById('stCh').getContext('2d');
+  if(CHS.stk) CHS.stk.destroy();
+  CHS.stk=new Chart(ctx,{type:'line',data:{labels:s.h.map(function(_,i){return i;}),datasets:[{data:s.h,borderColor:s.c>=0?'#00c878':'#ef4444',backgroundColor:s.c>=0?'rgba(0,200,120,.1)':'rgba(239,68,68,.1)',fill:true,tension:.4,pointRadius:0,borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{display:false},y:{ticks:{color:'#475569',font:{size:9},callback:function(v){return v.toLocaleString();}},grid:{color:'rgba(255,255,255,.04)'}}}}});
+  renderStkList();
+}
+function updTrade(){
+  var s=STK[stSt.ai], q=parseInt(document.getElementById('st-qty').value)||0;
+  document.getElementById('st-ttl').textContent='الإجمالي: '+(s.price*q).toLocaleString()+' د.ع';
+}
+function stTrade(type){
+  var s=STK[stSt.ai], q=parseInt(document.getElementById('st-qty').value)||0;
+  if(q<=0) return;
+  var tot=s.price*q;
+  if(type==='buy'){
+    if(tot>stSt.cash){alert('رصيد غير كافٍ');return;}
+    stSt.cash-=tot;
+    var ex=stSt.port.find(function(p){return p.id===s.id;});
+    if(ex){ex.avg=(ex.avg*ex.qty+tot)/(ex.qty+q);ex.qty+=q;}
+    else stSt.port.push({id:s.id,sym:s.sym,name:s.name,qty:q,avg:s.price});
+    showToast('✅ تم شراء '+q+' سهم من '+s.name,'g');
+  } else {
+    var ex=stSt.port.find(function(p){return p.id===s.id;});
+    if(!ex||ex.qty<q){alert('لا تملك هذه الكمية');return;}
+    stSt.cash+=tot; ex.qty-=q;
+    if(ex.qty===0) stSt.port=stSt.port.filter(function(p){return p.id!==s.id;});
+    showToast('✅ تم بيع '+q+' سهم من '+s.name,'r');
+  }
+  updStUI();
+}
+function updStUI(){
+  var pv=0,inv=0;
+  stSt.port.forEach(function(p){var s=STK.find(function(x){return x.id===p.id;});if(s){pv+=s.price*p.qty;inv+=p.avg*p.qty;}});
+  var pnl=pv-inv;
+  document.getElementById('st-cash').textContent=stSt.cash.toLocaleString();
+  document.getElementById('st-pv').textContent=pv.toLocaleString();
+  var pe=document.getElementById('st-pnl');
+  pe.textContent=(pnl>=0?'+':'')+Math.round(pnl).toLocaleString();
+  pe.style.color=pnl>=0?'#00c878':'#ef4444';
+  document.getElementById('st-hold').innerHTML=stSt.port.length===0?'<span style="color:#475569">لا توجد أسهم</span>'
+    :'<table class="tbl"><thead><tr><th>الرمز</th><th>ك</th><th>سعر الشراء</th><th>الحالي</th><th>ر/خ</th></tr></thead><tbody>'
+    +stSt.port.map(function(p){
+      var s=STK.find(function(x){return x.id===p.id;}), cx=s?s.price:p.avg, pl=(cx-p.avg)*p.qty;
+      return '<tr><td>'+p.sym+'</td><td>'+p.qty+'</td><td>'+Math.round(p.avg).toLocaleString()+'</td><td>'+cx.toLocaleString()+'</td><td style="color:'+(pl>=0?'#00c878':'#ef4444')+'">'+(pl>=0?'+':'')+Math.round(pl).toLocaleString()+'</td></tr>';
+    }).join('')+'</tbody></table>';
+}
+
+// ─── ACCOUNTING ───
+var ACCTS=['الصندوق','المصرف','المخزون','المدينون','الأثاث','المعدات','العقارات','الدائنون','القروض','رأس المال','المبيعات','إيرادات أخرى','المشتريات','مصروف الرواتب','مصروف الإيجار','مصروف الاندثار','مصاريف عمومية'];
+var jData=[]; try{jData=JSON.parse(localStorage.getItem('fl_j')||'[]');}catch(e){}
+var jRC=0;
+
+function addRow(ac,db,cr){
+  var tb=document.getElementById('j-rows');
+  var tr=document.createElement('tr'); tr.id='jr'+jRC++;
+  var opts=ACCTS.map(function(a){return '<option'+(a===ac?' selected':'')+'>'+a+'</option>';}).join('');
+  tr.innerHTML='<td><select style="width:100%;height:33px;background:#0f172a;border:1px solid #334155;border-radius:5px;color:#e2e8f0;padding:0 6px;font-size:.82rem;outline:none;">'+opts+'</select></td>'
+    +'<td><input type="number" value="'+(db||0)+'" oninput="calcBal()" style="width:100%;height:33px;background:#0f172a;border:1px solid #334155;border-radius:5px;color:#e2e8f0;padding:0 6px;font-family:monospace;outline:none;"></td>'
+    +'<td><input type="number" value="'+(cr||0)+'" oninput="calcBal()" style="width:100%;height:33px;background:#0f172a;border:1px solid #334155;border-radius:5px;color:#e2e8f0;padding:0 6px;font-family:monospace;outline:none;"></td>'
+    +'<td><button onclick="this.closest(\'tr\').remove();calcBal();" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:1.1rem">×</button></td>';
+  tb.appendChild(tr); calcBal();
+}
+function calcBal(){
+  var d=0,c=0;
+  document.querySelectorAll('#j-rows tr').forEach(function(tr){
+    var ins=tr.querySelectorAll('input[type="number"]');
+    d+=parseFloat((ins[0]&&ins[0].value)||0); c+=parseFloat((ins[1]&&ins[1].value)||0);
+  });
+  var el=document.getElementById('j-bal');
+  el.textContent='مدين: '+d.toLocaleString()+' | دائن: '+c.toLocaleString();
+  el.style.color=(d===c&&d>0)?'#00c878':'#ef4444';
+  return{d:d,c:c};
+}
+function postJ(){
+  var b=calcBal();
+  if(b.d!==b.c||b.d===0){jMsg('❌ القيد غير متوازن — المدين ≠ الدائن',false);return;}
+  var date=document.getElementById('j-dt').value;
+  var desc=document.getElementById('j-ds').value||'بدون بيان';
+  var gid=Date.now();
+  document.querySelectorAll('#j-rows tr').forEach(function(tr){
+    var sel=tr.querySelector('select');
+    var ins=tr.querySelectorAll('input[type="number"]');
+    var d=parseFloat((ins[0]&&ins[0].value)||0), c=parseFloat((ins[1]&&ins[1].value)||0);
+    if(d>0||c>0) jData.push({gid:gid,date:date,desc:desc,acc:sel.value,d:d,c:c});
+  });
+  try{localStorage.setItem('fl_j',JSON.stringify(jData));}catch(e){}
+  jMsg('✅ تم ترحيل القيد',true);
+  document.getElementById('j-rows').innerHTML=''; jRC=0;
+  document.getElementById('j-ds').value='';
+  addRow(); addRow(); renderJLog();
+}
+function jMsg(txt,ok){
+  var el=document.getElementById('j-msg');
+  el.textContent=txt; el.style.display='block';
+  el.className='msg '+(ok?'msg-ok':'msg-er');
+  setTimeout(function(){el.style.display='none';},3000);
+}
+function clearAll(){
+  if(!confirm('حذف جميع القيود؟')) return;
+  jData=[]; try{localStorage.removeItem('fl_j');}catch(e){}
+  renderJLog();
+}
+function renderJLog(){
+  document.getElementById('j-cnt').textContent=jData.length+' إدخال';
+  if(!jData.length){document.getElementById('j-log').innerHTML='<tr><td colspan="5" style="text-align:center;color:#475569;padding:16px">لا توجد قيود</td></tr>';return;}
+  document.getElementById('j-log').innerHTML=jData.slice().reverse().map(function(e){
+    return '<tr><td style="font-family:monospace;font-size:.75rem">'+e.date+'</td><td style="font-size:.75rem;max-width:100px">'+e.desc+'</td><td>'+e.acc+'</td><td style="color:#00c878;font-family:monospace">'+(e.d>0?e.d.toLocaleString():'')+'</td><td style="color:#ef4444;font-family:monospace">'+(e.c>0?e.c.toLocaleString():'')+'</td></tr>';
+  }).join('');
+}
+function switchTab(id){
+  ['jrn','led','tri'].forEach(function(t,i){
+    document.getElementById('tab-'+t).style.display=t===id?'block':'none';
+    document.querySelectorAll('.tab')[i].classList.toggle('on',t===id);
+  });
+  if(id==='led') renderLed();
+  if(id==='tri') renderTri();
+}
+function buildLed(){
+  var led={};
+  ACCTS.forEach(function(a){led[a]={d:[],c:[],bal:0};});
+  jData.forEach(function(e){
+    if(led[e.acc]){if(e.d>0)led[e.acc].d.push(e);if(e.c>0)led[e.acc].c.push(e);}
+  });
+  ACCTS.forEach(function(a){led[a].bal=led[a].d.reduce(function(s,e){return s+e.d;},0)-led[a].c.reduce(function(s,e){return s+e.c;},0);});
+  return led;
+}
+function renderLed(){
+  var led=buildLed(), g=document.getElementById('led-grid');
+  var active=Object.entries(led).filter(function(e){return e[1].d.length||e[1].c.length;});
+  if(!active.length){g.innerHTML='<p style="color:#475569;font-size:.85rem">لا توجد قيود مرحلة.</p>';return;}
+  g.innerHTML=active.map(function(e){
+    var nm=e[0],v=e[1];
+    return '<div style="background:#0f172a;border:1px solid #334155;border-radius:8px;overflow:hidden">'
+      +'<div style="background:#1e293b;padding:7px 10px;font-size:.8rem;font-weight:700;color:#f59e0b;text-align:center">'+nm+'</div>'
+      +'<div style="display:flex">'
+      +'<div style="flex:1;padding:7px;font-size:.72rem;font-family:monospace;border-left:1px solid #334155"><div style="color:#475569;font-size:.65rem;margin-bottom:3px">مدين</div>'
+        +v.d.map(function(x){return '<div style="color:#00c878">'+x.d.toLocaleString()+'</div>';}).join('')+'</div>'
+      +'<div style="flex:1;padding:7px;font-size:.72rem;font-family:monospace"><div style="color:#475569;font-size:.65rem;margin-bottom:3px">دائن</div>'
+        +v.c.map(function(x){return '<div style="color:#ef4444">'+x.c.toLocaleString()+'</div>';}).join('')+'</div>'
+      +'</div>'
+      +'<div style="padding:5px 10px;background:#0a1020;font-family:monospace;font-size:.75rem;display:flex;justify-content:space-between;border-top:1px solid #334155">'
+        +'<span>الرصيد</span><span style="color:'+(v.bal>=0?'#00c878':'#ef4444')+'">'+Math.abs(v.bal).toLocaleString()+' '+(v.bal>=0?'د':'ك')+'</span></div>'
+      +'</div>';
+  }).join('');
+}
+function renderTri(){
+  var led=buildLed(); var td=0,tc=0;
+  var rows=Object.entries(led).filter(function(e){return e[1].bal!==0;}).map(function(e){
+    var d=e[1].bal>0?e[1].bal:0, c=e[1].bal<0?Math.abs(e[1].bal):0;
+    td+=d; tc+=c;
+    return '<tr><td>'+e[0]+'</td><td style="color:#00c878;font-family:monospace">'+(d?d.toLocaleString():'-')+'</td><td style="color:#ef4444;font-family:monospace">'+(c?c.toLocaleString():'-')+'</td></tr>';
+  }).join('');
+  var ok=Math.abs(td-tc)<1;
+  document.getElementById('tri-body').innerHTML=rows
+    +'<tr style="font-weight:700;background:#1e293b;border-top:2px solid #475569"><td>الإجمالي</td><td style="color:#f59e0b;font-family:monospace">'+td.toLocaleString()+'</td><td style="color:#f59e0b;font-family:monospace">'+tc.toLocaleString()+'</td></tr>'
+    +'<tr><td colspan="3" style="text-align:center;padding:8px;color:'+(ok?'#00c878':'#ef4444')+'">'+( ok?'✅ الميزان متوازن':'❌ غير متوازن — الفرق: '+Math.abs(td-tc).toLocaleString())+'</td></tr>';
+}
+
+// ─── ATM ───
+var atmBal=5000000, atmIn='', atmHist=[];
+function ak(k){
+  if(k==='C'){atmIn='';}
+  else if(k==='000'){if(atmIn.length) atmIn+='000';}
+  else{if(atmIn.length<10) atmIn+=k;}
+  document.getElementById('atm-disp').textContent=atmIn?parseInt(atmIn).toLocaleString():'';
+  document.getElementById('atm-msg').textContent='أدخل المبلغ';
+}
+function ado(type){
+  var val=parseInt(atmIn)||0;
+  var msg=document.getElementById('atm-msg');
+  if(type==='bal'){msg.textContent='رصيدك: '+atmBal.toLocaleString()+' د.ع';return;}
+  if(!val){msg.textContent='⚠️ أدخل مبلغاً أولاً';return;}
+  if(type==='wdr'){
+    if(val>atmBal){msg.textContent='❌ رصيد غير كافٍ';return;}
+    if(val%25000!==0){msg.textContent='⚠️ يجب مضاعفات 25,000 د.ع';return;}
+    atmBal-=val; msg.textContent='✅ تم صرف '+val.toLocaleString()+' د.ع';
+    atmHist.unshift('سحب: −'+val.toLocaleString());
+  } else {
+    atmBal+=val; msg.textContent='✅ تم إيداع '+val.toLocaleString()+' د.ع';
+    atmHist.unshift('إيداع: +'+val.toLocaleString());
+  }
+  document.getElementById('atm-bal').textContent=atmBal.toLocaleString()+' د.ع';
+  document.getElementById('atm-hist').innerHTML=atmHist.slice(0,5).join(' · ');
+  atmIn=''; document.getElementById('atm-disp').textContent='';
+}
+
+// ─── BONDS ───
+var BONDS=[
+  {id:'IGB26',name:'سند حكومي عراقي 2026',face:1000000,cpn:7.5, yrs:2,px:985000, rating:'BB+'},
+  {id:'IGB28',name:'سند حكومي عراقي 2028',face:1000000,cpn:9.0, yrs:4,px:975000, rating:'BB+'},
+  {id:'IGB30',name:'سند حكومي عراقي 2030',face:1000000,cpn:10.5,yrs:6,px:960000, rating:'BB'},
+  {id:'IGB33',name:'سند حكومي عراقي 2033',face:1000000,cpn:12.0,yrs:9,px:940000, rating:'BB'},
+  {id:'CRP1', name:'سند نفط الوسط',        face:500000, cpn:11.0,yrs:3,px:495000, rating:'B+'},
+  {id:'CRP2', name:'سند مصرف بغداد',        face:500000, cpn:8.5, yrs:5,px:490000, rating:'B+'},
+  {id:'DEBT1',name:'ورقة دين حكومي قصير', face:250000, cpn:5.0, yrs:1,px:245000, rating:'A'},
+  {id:'DEBT2',name:'سند شركة الكهرباء',   face:750000, cpn:13.0,yrs:7,px:720000, rating:'B'}
+];
+var bSt={cash:20000000,hold:[]};
+
+function ytmCalc(face,px,cpn,yrs){
+  var c=face*(cpn/100), y=cpn/100;
+  for(var i=0;i<150;i++){
+    var pv=0,dpv=0;
+    for(var t=1;t<=yrs;t++){pv+=c/Math.pow(1+y,t);dpv-=t*c/Math.pow(1+y,t+1);}
+    pv+=face/Math.pow(1+y,yrs); dpv-=yrs*face/Math.pow(1+y,yrs+1);
+    var diff=pv-px; if(Math.abs(diff)<0.5) break; y-=diff/dpv;
+  }
+  return y*100;
+}
+function renderBonds(){
+  document.getElementById('b-list').innerHTML=BONDS.map(function(b){
+    var ytm=ytmCalc(b.face,b.px,b.cpn,b.yrs).toFixed(2);
+    var lbl=b.px>b.face?'علاوة اصدار':b.px<b.face?'خصم اصدار':'قيمة اسمية';
+    return '<div class="bond" onclick="buyBond(\''+b.id+'\')">'
+      +'<div style="display:flex;justify-content:space-between;align-items:flex-start">'
+      +'<div><div class="bond-id">'+b.id+' · '+b.rating+'</div><div class="bond-nm">'+b.name+'</div></div>'
+      +'<div style="text-align:left"><div style="font-family:monospace;font-size:.88rem;font-weight:700;color:#60a5fa">'+b.px.toLocaleString()+'</div><div style="font-size:.68rem;color:'+(b.px<b.face?'#00c878':'#ef4444')+'">'+lbl+'</div></div>'
+      +'</div>'
+      +'<div class="bond-row">'
+      +'<div class="bond-s">كوبون: <span>'+b.cpn+'%</span></div>'
+      +'<div class="bond-s">YTM: <span style="color:#f59e0b">'+ytm+'%</span></div>'
+      +'<div class="bond-s">استحقاق: <span>'+b.yrs+' سنوات</span></div>'
+      +'<div class="bond-s">دخل سنوي: <span>'+(b.face*b.cpn/100).toLocaleString()+'</span></div>'
+      +'</div></div>';
+  }).join('');
+}
+function buyBond(id){
+  var b=BONDS.find(function(x){return x.id===id;});
+  if(!b) return;
+  if(!confirm('شراء سند "'+b.name+'" بسعر '+b.px.toLocaleString()+' د.ع؟')) return;
+  if(b.px>bSt.cash){alert('رصيد غير كافٍ');return;}
+  bSt.cash-=b.px;
+  var ex=bSt.hold.find(function(h){return h.id===id;});
+  if(ex) ex.qty++; else bSt.hold.push({id:id,name:b.name,qty:1,px:b.px,cpn:b.cpn,face:b.face,yrs:b.yrs});
+  updBonds(); showToast('✅ تم شراء السند','g');
+}
+function updBonds(){
+  var bv=0,ci=0;
+  bSt.hold.forEach(function(h){bv+=h.px*h.qty;ci+=h.face*h.cpn/100*h.qty;});
+  document.getElementById('b-cash').textContent=bSt.cash.toLocaleString();
+  document.getElementById('b-val').textContent=bv.toLocaleString();
+  document.getElementById('b-inc').textContent=ci.toLocaleString();
+  document.getElementById('b-hold').innerHTML=bSt.hold.length===0?'<span style="color:#475569;font-size:.83rem">لا توجد سندات</span>'
+    :'<table class="tbl"><thead><tr><th>السند</th><th>الكمية</th><th>سعر الشراء</th><th>الدخل السنوي</th></tr></thead><tbody>'
+    +bSt.hold.map(function(h){
+      return '<tr><td style="font-size:.78rem">'+h.name+'</td><td>'+h.qty+'</td><td style="font-family:monospace">'+h.px.toLocaleString()+'</td><td style="color:#00c878;font-family:monospace">'+(h.face*h.cpn/100*h.qty).toLocaleString()+'</td></tr>';
+    }).join('')+'</tbody></table>';
+}
+function calcYTM(){
+  var face=parseFloat(document.getElementById('y-face').value)||0;
+  var px=parseFloat(document.getElementById('y-px').value)||0;
+  var cpn=parseFloat(document.getElementById('y-cpn').value)||0;
+  var yrs=parseFloat(document.getElementById('y-yrs').value)||0;
+  if(!face||!px||!yrs) return;
+  var ytm=ytmCalc(face,px,cpn,yrs);
+  var ann=face*cpn/100;
+  var el=document.getElementById('y-res');
+  el.innerHTML='<div class="stat"><span class="stat-l">العائد حتى الاستحقاق (YTM)</span><span class="stat-v gold">'+ytm.toFixed(3)+'%</span></div>'
+    +'<div class="stat"><span class="stat-l">الدخل السنوي (الكوبون)</span><span class="stat-v g">'+ann.toLocaleString()+' د.ع</span></div>'
+    +'<div class="stat"><span class="stat-l">وضع السند</span><span class="stat-v '+(px>face?'r':px<face?'g':'')+'">'+( px>face?'يُتداول بعلاوة':px<face?'يُتداول بخصم':'يُتداول بالقيمة الاسمية')+'</span></div>'
+    +'<div class="stat"><span class="stat-l">فارق YTM – الكوبون</span><span class="stat-v">'+( ytm-cpn).toFixed(3)+'%</span></div>';
+  el.style.display='block';
+}
+function drawBondCurve(){
+  var yields=[4,5,6,7,8,9,10,11,12,13,14,15];
+  var face=1000000, cpn=0.09, yrs=5;
+  var prices=yields.map(function(y){
+    var r=y/100, pv=0;
+    for(var t=1;t<=yrs;t++) pv+=face*cpn/Math.pow(1+r,t);
+    pv+=face/Math.pow(1+r,yrs); return Math.round(pv);
+  });
+  var ctx=document.getElementById('bCh').getContext('2d');
+  if(CHS.bond) CHS.bond.destroy();
+  CHS.bond=new Chart(ctx,{type:'line',data:{labels:yields.map(function(y){return y+'%';}),datasets:[{data:prices,borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,.1)',fill:true,tension:.4,pointRadius:3,pointBackgroundColor:'#3b82f6'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return ctx.parsed.y.toLocaleString()+' د.ع';}}}},scales:{x:{ticks:{color:'#475569',font:{size:9}},title:{display:true,text:'العائد',color:'#64748b',font:{size:9}}},y:{ticks:{color:'#475569',font:{size:9},callback:function(v){return (v/1000).toFixed(0)+'k';}},grid:{color:'rgba(255,255,255,.04)'}}}}});
+}
+
+// ─── TOAST ───
+function showToast(msg,type){
+  var t=document.createElement('div');
+  t.style='position:fixed;bottom:20px;right:20px;background:'+(type==='g'?'#065f46':'#7f1d1d')+';color:'+(type==='g'?'#6ee7b7':'#fca5a5')+';padding:10px 20px;border-radius:8px;font-size:.85rem;z-index:9999;border:1px solid '+(type==='g'?'rgba(0,200,120,.3)':'rgba(239,68,68,.3)');
+  t.textContent=msg; document.body.appendChild(t);
+  setTimeout(function(){t.remove();},2500);
+}
+</script>
+</body>
+</html>

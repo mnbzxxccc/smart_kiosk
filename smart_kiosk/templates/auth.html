@@ -1,0 +1,359 @@
+{% extends "layout.html" %}
+
+{% block title %}بوابة الدخول الموحد — كلية صدر العراق التقني{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Premium Auth Theme */
+    .auth-page-wrapper {
+        min-height: calc(100vh - 80px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        background: radial-gradient(circle at top right, var(--primary-glow), transparent 40%),
+                    radial-gradient(circle at bottom left, var(--sarah-glow), transparent 40%);
+    }
+
+    .auth-glass-card {
+        width: 100%;
+        max-width: 550px;
+        background: rgba(11, 15, 25, 0.7);
+        backdrop-filter: blur(30px);
+        border: 1px solid var(--border);
+        border-radius: 32px;
+        padding: 45px;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        animation: cardAppear 0.8s var(--transition);
+    }
+
+    @keyframes cardAppear {
+        from { opacity: 0; transform: translateY(40px) scale(0.95); }
+        to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .auth-header { text-align: center; margin-bottom: 35px; }
+    .auth-header i { font-size: 3.5rem; color: var(--accent); margin-bottom: 20px; filter: drop-shadow(0 0 15px var(--accent-dim)); }
+    .auth-header h2 { font-size: 2rem; font-weight: 800; margin-bottom: 8px; }
+    .auth-header p { color: var(--text-dim); }
+
+    /* Tabs */
+    .auth-tabs {
+        display: flex;
+        background: rgba(255, 255, 255, 0.05);
+        padding: 6px;
+        border-radius: 16px;
+        margin-bottom: 30px;
+        border: 1px solid var(--border);
+    }
+    .auth-tab {
+        flex: 1;
+        padding: 12px;
+        border: none;
+        background: transparent;
+        color: var(--text-dim);
+        font-weight: 700;
+        cursor: pointer;
+        border-radius: 12px;
+        transition: 0.3s;
+    }
+    .auth-tab.active {
+        background: var(--primary);
+        color: white;
+        box-shadow: 0 4px 15px var(--primary-glow);
+    }
+
+    /* Google Button */
+    .google-btn {
+        width: 100%;
+        padding: 14px;
+        background: white;
+        color: #111;
+        border: none;
+        border-radius: 14px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        cursor: pointer;
+        margin-bottom: 25px;
+        transition: 0.3s;
+    }
+    .google-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(255,255,255,0.1); }
+    
+    .divider {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        color: var(--text-dim);
+        font-size: 0.85rem;
+        margin-bottom: 25px;
+    }
+    .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    /* Form Styles */
+    .form-group { margin-bottom: 20px; }
+    .form-group label { display: block; margin-bottom: 10px; font-weight: 600; color: var(--text-dim); font-size: 0.9rem; padding-right: 5px; }
+    .form-input-wrapper { position: relative; }
+    .form-input-wrapper i { position: absolute; right: 18px; top: 50%; transform: translateY(-50%); color: var(--text-dim); }
+    .form-control {
+        width: 100%;
+        height: 55px;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        color: white;
+        padding: 0 50px 0 15px;
+        font-size: 1.05rem;
+        transition: 0.3s;
+    }
+    .form-control:focus {
+        border-color: var(--primary);
+        background: rgba(255,255,255,0.06);
+        box-shadow: 0 0 0 4px var(--primary-glow);
+    }
+
+    .btn-submit {
+        width: 100%;
+        height: 58px;
+        background: linear-gradient(135deg, var(--primary), #1d4ed8);
+        color: white;
+        border: none;
+        border-radius: 16px;
+        font-weight: 800;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: 0.3s;
+        margin-top: 10px;
+    }
+    .btn-submit:hover { transform: translateY(-3px); box-shadow: 0 15px 30px var(--primary-glow); }
+
+    /* Phone Verification Section */
+    .phone-verify-box {
+        display: flex;
+        gap: 10px;
+    }
+    .btn-verify {
+        background: var(--accent);
+        color: var(--bg);
+        border: none;
+        border-radius: 14px;
+        padding: 0 20px;
+        font-weight: 700;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+
+    .error-msg { background: rgba(239, 68, 68, 0.1); color: var(--danger); padding: 12px; border-radius: 12px; font-size: 0.9rem; margin-top: 15px; display: none; border: 1px solid rgba(239,68,68,0.2); text-align: center; }
+    .success-msg { background: rgba(16, 185, 129, 0.1); color: var(--success); padding: 12px; border-radius: 12px; font-size: 0.9rem; margin-top: 15px; display: none; border: 1px solid rgba(16,185,129,0.2); text-align: center; }
+
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-page-wrapper">
+    <div class="auth-glass-card">
+        <div class="auth-header">
+            <i class="fa-solid fa-id-card-clip"></i>
+            <h2>بوابة الهوية الذكية</h2>
+            <p>سجل دخولك للوصول إلى الأقساط والمحاضرات والحضور</p>
+        </div>
+
+        <button class="google-btn" onclick="simulatedGoogleLogin()">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_Logo.svg" width="20" alt="Google">
+            المتابعة باستخدام حساب جوجل
+        </button>
+
+        <div class="divider">أو عبر الرقم الجامعي</div>
+
+        <div class="auth-tabs">
+            <button id="tab-login" class="auth-tab active" onclick="switchMode('login')">تسجيل الدخول</button>
+            <button id="tab-register" class="auth-tab" onclick="switchMode('register')">إنشاء حساب جديد</button>
+        </div>
+
+        <!-- Login Form -->
+        <div id="loginSection">
+            <div class="form-group">
+                <label>الرقم الجامعي</label>
+                <div class="form-input-wrapper">
+                    <i class="fa-solid fa-hashtag"></i>
+                    <input type="text" id="loginSid" class="form-control" placeholder="مثال: 20240001">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>كلمة المرور</label>
+                <div class="form-input-wrapper">
+                    <i class="fa-solid fa-lock"></i>
+                    <input type="password" id="loginPw" class="form-control" placeholder="••••••••">
+                </div>
+            </div>
+            <button class="btn-submit" onclick="handleLogin()">دخول المنصة <i class="fa-solid fa-arrow-left" style="margin-right: 10px;"></i></button>
+            <div id="loginErr" class="error-msg"></div>
+        </div>
+
+        <!-- Register Form -->
+        <div id="registerSection" style="display: none;">
+            <div class="form-group">
+                <label>الاسم الكامل (كما في الهوية)</label>
+                <div class="form-input-wrapper">
+                    <i class="fa-solid fa-user"></i>
+                    <input type="text" id="regName" class="form-control" placeholder="الاسم الثلاثي">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>الرقم الجامعي</label>
+                <div class="form-input-wrapper">
+                    <i class="fa-solid fa-id-card"></i>
+                    <input type="text" id="regSid" class="form-control" placeholder="المعرف الجامعي">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>رقم الهاتف (للتوثيق)</label>
+                <div class="phone-verify-box">
+                    <div class="form-input-wrapper" style="flex: 1;">
+                        <i class="fa-solid fa-phone"></i>
+                        <input type="tel" id="regPhone" class="form-control" placeholder="07XXXXXXXX">
+                    </div>
+                    <button class="btn-verify" onclick="sendOTP()">تحقق</button>
+                </div>
+            </div>
+            <div id="otpInputGroup" class="form-group" style="display: none;">
+                <label>رمز التأكيد (وصلك في رسالة)</label>
+                <input type="text" id="regOTP" class="form-control" style="text-align: center; letter-spacing: 5px;" placeholder="0000">
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                <div class="form-group" style="margin: 0;">
+                    <label>القسم</label>
+                    <select id="regDept" class="form-control" style="padding-right: 15px;">
+                        <option value="تقنيات الحاسوب">تقنيات الحاسوب</option>
+                        <option value="الأمن السبراني">الأمن السبراني</option>
+                        <option value="القانون">القانون</option>
+                        <option value="إدارة الأعمال">إدارة الأعمال</option>
+                        <option value="الأجهزة الطبية">الأجهزة الطبية</option>
+                    </select>
+                </div>
+                <div class="form-group" style="margin: 0;">
+                    <label>المرحلة</label>
+                    <select id="regStage" class="form-control" style="padding-right: 15px;">
+                        <option value="الأولى">الأولى</option>
+                        <option value="الثانية">الثانية</option>
+                        <option value="الثالثة">الثالثة</option>
+                        <option value="الرابعة">الرابعة</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>تعيين كلمة المرور</label>
+                <div class="form-input-wrapper">
+                    <i class="fa-solid fa-key"></i>
+                    <input type="password" id="regPw" class="form-control" placeholder="••••••••">
+                </div>
+            </div>
+            <button class="btn-submit" onclick="handleRegister()">تفعيل الحساب الذكي <i class="fa-solid fa-check-double" style="margin-right: 10px;"></i></button>
+            <div id="regErr" class="error-msg"></div>
+            <div id="regSucc" class="success-msg"></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function switchMode(mode) {
+        document.getElementById('loginSection').style.display = mode === 'login' ? 'block' : 'none';
+        document.getElementById('registerSection').style.display = mode === 'register' ? 'block' : 'none';
+        document.getElementById('tab-login').classList.toggle('active', mode === 'login');
+        document.getElementById('tab-register').classList.toggle('active', mode === 'register');
+    }
+
+    function sendOTP() {
+        const phone = document.getElementById('regPhone').value;
+        if(!phone) return alert("يرجى إدخال رقم الهاتف أولاً");
+        alert("تم إرسال رمز التحقق (محاكاة) إلى الرابط المربوط هاتفك.");
+        document.getElementById('otpInputGroup').style.display = 'block';
+    }
+
+    async function handleLogin() {
+        const sid = document.getElementById('loginSid').value;
+        const pw = document.getElementById('loginPw').value;
+        const err = document.getElementById('loginErr');
+        
+        err.style.display = 'none';
+        if(!sid || !pw) { 
+            err.innerText = "الرجاء إدخال كافة البيانات المطلوبة"; 
+            err.style.display = 'block'; 
+            return; 
+        }
+
+        try {
+            const res = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ student_id: sid, password: pw })
+            });
+            const data = await res.json();
+            if(data.success) {
+                location.href = "{{ url_for('index') }}";
+            } else {
+                err.innerText = data.error || "تأكد من الرقم الجامعي أو كلمة السر";
+                err.style.display = 'block';
+            }
+        } catch(e) {
+            err.innerText = "فشل الاتصال بخادم الكلية المركزي";
+            err.style.display = 'block';
+        }
+    }
+
+    async function handleRegister() {
+        const sid = document.getElementById('regSid').value;
+        const name = document.getElementById('regName').value;
+        const dept = document.getElementById('regDept').value;
+        const stage = document.getElementById('regStage').value;
+        const phone = document.getElementById('regPhone').value;
+        const pw = document.getElementById('regPw').value;
+        const err = document.getElementById('regErr');
+        const succ = document.getElementById('regSucc');
+
+        err.style.display = 'none';
+        succ.style.display = 'none';
+
+        if(!sid || !name || !pw || !phone) {
+            err.innerText = "جميع الحقول مطلوبة لإتمام عملية البطاقة الذكية";
+            err.style.display = 'block';
+            return;
+        }
+
+        try {
+            const res = await fetch('/api/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    student_id: sid, 
+                    password: pw, 
+                    display_name: name, 
+                    department: dept, 
+                    stage: stage,
+                    phone: phone
+                })
+            });
+            const data = await res.json();
+            if(data.success) {
+                succ.innerText = "تم تفعيل حسابك الأكاديمي بنجاح! جاري تحويلك للدخول...";
+                succ.style.display = 'block';
+                setTimeout(() => switchMode('login'), 2500);
+            } else {
+                err.innerText = data.error || "خطأ أثناء ربط البيانات الجامعية";
+                err.style.display = 'block';
+            }
+        } catch(e) {
+            err.innerText = "خطأ في تسجيل البيانات في قاعدة الهويات الذكية";
+            err.style.display = 'block';
+        }
+    }
+
+    function simulatedGoogleLogin() {
+        alert("بدء محاكاة تسجيل الدخول عبر جوجل... (هذه الميزة تتطلب Client ID حقيقي في بيئة الإنتاج)");
+    }
+</script>
+{% endblock %}

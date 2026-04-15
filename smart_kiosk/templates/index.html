@@ -1,0 +1,240 @@
+{% extends "layout.html" %}
+
+{% block title %}الرئيسية — بوابة فالديس الذكية{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section fade-in">
+    <div class="hero-glow"></div>
+    <div class="hero-content">
+        <div class="user-badge" style="background: var(--sarah-glow); color: var(--sarah-primary); display: inline-flex; padding: 5px 15px; border-radius: 20px; font-size: 0.85rem; margin-bottom: 20px;">
+            <i class="fa-solid fa-bolt-lightning" style="margin-left: 8px;"></i> النظام يعمل بكفاءة عالية (V4.2)
+        </div>
+        <h1 class="hero-title">بوابة المستقبل الأكاديمي</h1>
+        <p class="hero-p">مرحباً بك في المنصة الذكية المتكاملة لكلية صدر العراق التقني. درب مهاراتك في أعقد المختبرات الافتراضية المدعومة بالذكاء الاصطناعي.</p>
+    </div>
+</section>
+
+<!-- Stats Metrics Bar -->
+<div class="metrics-bar fade-in" style="animation-delay: 0.2s;">
+    <div class="metric-pill">
+        <i class="fa-solid fa-microchip"></i>
+        <span>12+ أداة ذكاء اصطناعي</span>
+    </div>
+    <div class="metric-pill">
+        <i class="fa-solid fa-graduation-cap"></i>
+        <span>9 أقسام علمية</span>
+    </div>
+    <div class="metric-pill">
+        <i class="fa-solid fa-user-shield"></i>
+        <span>أمن سبراني متقدم</span>
+    </div>
+    <div class="metric-pill">
+        <i class="fa-solid fa-clock"></i>
+        <span>دعم فني 24/7</span>
+    </div>
+</div>
+
+<!-- Main Simulation Hubs -->
+<div class="page-header mt-20 fade-in" style="animation-delay: 0.3s;">
+    <h2><i class="fa-solid fa-rocket" style="margin-left: 10px;"></i> المختبرات والمحاكاة</h2>
+    <p>اختر المختبر الذي تود بدء التدريب فيه الآن.</p>
+</div>
+
+<div class="home-grid fade-in" style="animation-delay: 0.4s;">
+    <div class="glass-card" onclick="location.href='{{ url_for('chat_page') }}'">
+        <i class="fa-solid fa-robot" style="color: var(--primary);"></i>
+        <div>
+            <h3>المساعد الذكي فالديس</h3>
+            <p>محرك RAG متقدم للإجابة على كافة استفساراتك الأكاديمية واللوائح الجامعية.</p>
+        </div>
+    </div>
+    
+    <div class="glass-card" onclick="location.href='{{ url_for('finance_hub') }}'">
+        <i class="fa-solid fa-vault" style="color: var(--accent);"></i>
+        <div>
+            <h3>محاكاة المالية والبورصة</h3>
+            <p>تدرب على استراتيجيات التداول، محاسبة القروض، وإدارة المحافظ المالية الحقيقية.</p>
+        </div>
+    </div>
+
+    <div class="glass-card" onclick="location.href='{{ url_for('law_hub') }}'">
+        <i class="fa-solid fa-building-columns" style="color: var(--sarah-primary);"></i>
+        <div>
+            <h3>العيادة والمحكمة الرقمية</h3>
+            <p>حل القضايا الجنائية، كشف تزوير الوثائق، والمرافعة في المحاكم الافتراضية.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Academic Departments Section -->
+<section class="mt-20 fade-in" style="animation-delay: 0.5s;">
+    <div class="page-header">
+        <h2><i class="fa-solid fa-layer-group" style="margin-left: 10px;"></i> الأقسام الأكاديمية</h2>
+        <p>تصفح متطلبات وخدمات كل قسم من أقسام الكلية.</p>
+    </div>
+    <div class="dept-grid">
+        <div class="dept-chip" onclick="alert('قسم تقنيات الحاسوب')">
+            <i class="fa-solid fa-laptop-code"></i>
+            <span>تقنيات الحاسوب</span>
+        </div>
+        <div class="dept-chip" onclick="alert('قسم القانون')">
+            <i class="fa-solid fa-gavel"></i>
+            <span>القانون</span>
+        </div>
+        <div class="dept-chip" onclick="alert('قسم المحاسبة')">
+            <i class="fa-solid fa-calculator"></i>
+            <span>المحاسبة</span>
+        </div>
+        <div class="dept-chip" onclick="alert('قسم إدارة الأعمال')">
+            <i class="fa-solid fa-briefcase"></i>
+            <span>إدارة الأعمال</span>
+        </div>
+        <div class="dept-chip" onclick="alert('قسم تقنيات الأجهزة الطبية')">
+            <i class="fa-solid fa-stethoscope"></i>
+            <span>الأجهزة الطبية</span>
+        </div>
+        <div class="dept-chip" onclick="alert('قسم الصيدلة / التمريض')">
+            <i class="fa-solid fa-pills"></i>
+            <span>العلوم الطبية</span>
+        </div>
+    </div>
+</section>
+
+<!-- News/Magazine Section (V5 Overhaul) -->
+<section id="magazine" class="mt-20 fade-in" style="animation-delay: 0.6s;">
+    <div class="page-header">
+        <h2><i class="fa-solid fa-newspaper" style="margin-left: 10px;"></i> المجلة الرقمية العالمية</h2>
+        <p>مواكبة لأحدث أخبار وزارة التعليم والجامعات العالمية والمحلية.</p>
+    </div>
+
+    <div class="magazine-container">
+        <!-- Featured Hero Slider -->
+        <div id="featured-slider" class="featured-magazine-slider">
+            <p class="text-center w-full">جاري تحميل الأخبار المميزة...</p>
+        </div>
+
+        <!-- Filters -->
+        <div class="magazine-filters">
+            <div class="filter-pill active" onclick="filterNews(this, 'الكل')">الكل</div>
+            <div class="filter-pill" onclick="filterNews(this, 'رسمي')">وزارة التعليم</div>
+            <div class="filter-pill" onclick="filterNews(this, 'تقنية')">عالمي (Harvard/Oxford)</div>
+            <div class="filter-pill" onclick="filterNews(this, 'محلي')">جامعة بغداد</div>
+            <div class="filter-pill" onclick="filterNews(this, 'طلابي')">نشاطات الكلية</div>
+        </div>
+
+        <!-- News Grid -->
+        <div id="news-grid" class="mag-grid">
+            <!-- Loaded via JS -->
+        </div>
+    </div>
+</section>
+
+<!-- News Reading Modal -->
+<div id="newsModal" class="mag-modal" onclick="closeNewsModal(event)">
+    <div class="mag-modal-content" onclick="event.stopPropagation()">
+        <div class="mag-modal-close" onclick="closeNewsModal()"><i class="fa-solid fa-xmark"></i></div>
+        <img id="modalImg" class="mag-modal-img" src="" alt="">
+        <div class="mag-modal-body">
+            <div id="modalMeta" class="mag-meta"></div>
+            <h2 id="modalTitle" class="mag-modal-title"></h2>
+            <div id="modalContent" class="mag-modal-text"></div>
+            <hr style="border:0; border-top:1px solid var(--border); margin:25px 0;">
+            <a id="modalSourceLink" href="#" target="_blank" class="nav-item" style="display:inline-flex; width:auto; padding:12px 30px; background:var(--accent); color:var(--bg); text-decoration:none; font-weight:800; border-radius:12px;">
+                <i class="fa-solid fa-arrow-up-right-from-square" style="margin-left:10px;"></i> زيارة المصدر الأصلي للخبر
+            </a>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let currentCategory = 'الكل';
+
+    async function loadNews(category = 'الكل') {
+        try {
+            const grid = document.getElementById('news-grid');
+            const slider = document.getElementById('featured-slider');
+            
+            // Load Featured First (limit 3)
+            const featRes = await fetch('/api/news?featured=true');
+            const featured = await featRes.json();
+            if (featured.length > 0) {
+                const top = featured[0];
+                slider.innerHTML = `
+                    <img src="${top.image_url}" class="featured-image">
+                    <div class="featured-overlay"></div>
+                    <div class="featured-content">
+                        <span class="featured-badge">خبر مميز</span>
+                        <h2 class="featured-title">${top.title}</h2>
+                        <button class="nav-item" style="width:auto; padding:8px 20px; background:var(--primary);" onclick="openNewsModal(${JSON.stringify(top).replace(/"/g, '&quot;')})">اقرأ القصة كاملة</button>
+                    </div>
+                `;
+            }
+
+            // Load Grid
+            const url = category === 'الكل' ? '/api/news' : `/api/news?category=${encodeURIComponent(category)}`;
+            const res = await fetch(url);
+            const news = await res.json();
+            
+            grid.innerHTML = '';
+            if (news.length === 0) {
+                grid.innerHTML = '<p class="text-center" style="grid-column: 1/-1;">لا توجد أخبار في هذا القسم حالياً.</p>';
+                return;
+            }
+
+            news.forEach(item => {
+                grid.innerHTML += `
+                    <div class="mag-card fade-in" onclick='openNewsModal(${JSON.stringify(item).replace(/"/g, '&quot;')})'>
+                        <img src="${item.image_url || 'https://via.placeholder.com/400x200'}" class="mag-thumb">
+                        <div class="mag-body">
+                            <div class="mag-meta">
+                                <span><i class="fa-solid fa-calendar-day"></i> ${new Date(item.date).toLocaleDateString('ar-EG')}</span>
+                                <span class="mag-source">${item.source || item.category}</span>
+                            </div>
+                            <h3 class="mag-title">${item.title}</h3>
+                            <p style="color:var(--text-dim); font-size:0.85rem;">${item.summary || item.content.substring(0, 80)}...</p>
+                        </div>
+                    </div>
+                `;
+            });
+        } catch (e) {
+            console.error("Magazine Load Error", e);
+        }
+    }
+
+    function filterNews(btn, cat) {
+        document.querySelectorAll('.filter-pill').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        loadNews(cat);
+    }
+
+    function openNewsModal(item) {
+        document.getElementById('modalImg').src = item.image_url;
+        document.getElementById('modalTitle').innerText = item.title;
+        document.getElementById('modalContent').innerText = item.content;
+        document.getElementById('modalMeta').innerHTML = `
+            <span>المصدر: ${item.source || 'رسمي'}</span>
+            <span>التاريخ: ${new Date(item.date).toLocaleDateString('ar-EG')}</span>
+        `;
+        const linkBtn = document.getElementById('modalSourceLink');
+        if (item.link) {
+            linkBtn.href = item.link;
+            linkBtn.style.display = 'inline-flex';
+        } else {
+            linkBtn.style.display = 'none';
+        }
+        document.getElementById('newsModal').style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeNewsModal() {
+        document.getElementById('newsModal').style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+
+    document.addEventListener('DOMContentLoaded', () => loadNews());
+</script>
+{% endblock %}

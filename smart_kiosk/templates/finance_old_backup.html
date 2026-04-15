@@ -1,0 +1,1539 @@
+{% extends "layout.html" %}
+
+{% block title %}المختبر المالي — بوابة فالديس الذكية{% endblock %}
+
+{% block extra_css %}
+<style>
+    .persona-banner {
+        display: flex; gap: 20px; background: var(--samer-glow); border: 1px solid var(--samer-primary); 
+        padding: 20px; border-radius: 20px; margin-bottom: 25px; align-items: center; 
+        animation: fadeIn 0.5s ease;
+    }
+    .persona-avatar {
+        width: 70px; height: 70px; background: var(--samer-primary); border-radius: 18px; 
+    }
+    /* --- Hub Grid Design --- */
+    .finance-hub-grid {
+        display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); 
+        gap: 16px; padding-bottom: 40px;
+    }
+    .hub-card {
+        background: var(--surface); backdrop-filter: var(--blur);
+        border: 1px solid var(--border); border-radius: var(--radius);
+        padding: 20px; cursor: pointer; transition: all 0.3s ease;
+        text-align: center; display: flex; flex-direction: column; align-items: center; gap: 10px;
+        position: relative; overflow: hidden; z-index: 100;
+        color: inherit; font-family: inherit; width: 100%;
+    }
+    .hub-card:hover { 
+        background: var(--surface-hover); border-color: var(--accent); 
+        transform: translateY(-6px); box-shadow: 0 12px 28px rgba(0,0,0,0.35); 
+    }
+    .hub-card:active { transform: scale(0.96); opacity: 0.8; }
+    
+    .hub-card-icon { 
+        width: 60px; height: 60px; border-radius: 16px; display: flex; 
+        align-items: center; justify-content: center; font-size: 1.6rem; transition: 0.3s; 
+    }
+    .hub-card:hover .hub-card-icon { transform: scale(1.1) rotate(5deg); }
+    .hub-card h4 { font-size: 1.2rem; font-weight: 800; margin: 5px 0 0; }
+    .hub-card p { font-size: 0.85rem; color: var(--text-dim); margin: 0 0 10px; line-height: 1.4; }
+    .sim-detail-panel {
+        display: none; animation: fadeIn 0.3s ease; max-width: 900px; 
+        margin: 0 auto; width: 100%; 
+    }
+    .glass-card {
+        background: var(--surface); border: 1px solid var(--border);
+        border-radius: var(--radius); padding: 30px; margin-bottom: 25px;
+    }
+    .input-group { margin-bottom: 15px; }
+    .input-group label { display: block; margin-bottom: 5px; color: var(--text-dim); font-size: 0.9rem; }
+    .form-control {
+        width: 100%; height: 45px; background: rgba(0,0,0,0.3); border: 1px solid var(--border);
+        border-radius: 10px; color: white; padding: 0 15px; outline: none; transition: 0.3s;
+    }
+    .form-control:focus { border-color: var(--primary); }
+    .action-btn {
+        width: 100%; height: 50px; background: var(--accent); color: var(--bg);
+        border: none; border-radius: 10px; font-weight: 800; cursor: pointer; transition: 0.3s;
+        font-size: 1.05rem;
+    }
+    .action-btn:hover { background: #fcd34d; }
+    
+    .res-box { 
+        margin-top: 20px; padding: 15px; background: rgba(251,191,36,0.1); 
+        border-radius: 12px; border: 1px dashed var(--accent); color: var(--accent); 
+        line-height: 1.6; font-size: 1.1rem;
+    }
+    
+    /* Tables */
+    .finance-table { width: 100%; border-collapse: collapse; margin: 15px 0; font-size: 0.95rem; }
+    .finance-table th { border-bottom: 1px solid var(--border); padding: 15px 10px; text-align: right; color: var(--text-dim); }
+    .finance-table td { padding: 15px 10px; border-bottom: 1px solid rgba(255,255,255,0.05); vertical-align: middle; }
+    .mini-btn { padding: 6px 15px; border-radius: 8px; cursor: pointer; border: none; font-weight: 700; transition: 0.2s; }
+    .buy-btn { background: rgba(16, 185, 129, 0.2); color: var(--success); border: 1px solid var(--success); }
+    .buy-btn:hover { background: var(--success); color: white; }
+    .sell-btn { background: rgba(239, 68, 68, 0.2); color: var(--danger); border: 1px solid var(--danger); }
+    .sell-btn:hover { background: var(--danger); color: white; }
+    
+    /* ATM Numpad */
+    .atm-screen {
+        background: #064e3b; color: #34d399; font-family: monospace; padding: 25px;
+        border-radius: 15px; border: 4px solid #022c22; text-align: center; margin-bottom: 20px;
+        box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+    }
+    .numpad {
+        display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; max-width: 300px; margin: 0 auto;
+    }
+    .num-key {
+        background: #1e293b; color: white; border: 2px solid #334155; border-radius: 10px;
+        height: 60px; font-size: 1.5rem; font-weight: 700; cursor: pointer; transition: 0.2s;
+    }
+    .num-key:hover { background: #334155; }
+    .num-key:active { transform: scale(0.95); }
+    .atm-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; max-width: 300px; margin: 15px auto 0; }
+    
+    /* Market Ticker & Index */
+    .market-ticker-container {
+        width: 100%; background: #000; color: #fff; padding: 10px 0; overflow: hidden;
+        border-top: 1px solid #333; border-bottom: 1px solid #333; margin-bottom: 20px; font-family: monospace; font-size: 1.1rem;
+    }
+    .market-ticker {
+        display: inline-block; white-space: nowrap; animation: ticker 25s linear infinite;
+    }
+    @keyframes ticker { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
+    .ticker-item { margin-left: 30px; display: inline-block; }
+    
+    .valdis-index-box {
+        background: rgba(0,0,0,0.4); border: 1px solid var(--border); border-radius: 10px; padding: 10px 20px;
+        text-align: center; display: inline-block;
+    }
+
+    /* Accounting Simulator Styles */
+    .acct-tab {
+        background: rgba(255,255,255,0.05); color: var(--text-dim); border: 1px solid var(--border);
+        padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.3s;
+    }
+    .acct-tab.active { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+    .acct-pane { animation: fadeIn 0.4s ease-out; }
+    
+    .ledger-card {
+        background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+        border-radius: 12px; padding: 15px; margin-bottom: 15px;
+    }
+    .ledger-title { color: var(--accent); border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px; margin-bottom: 10px; }
+    
+    .report-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    .report-table th { text-align: right; padding: 10px; border-bottom: 2px solid var(--border); }
+    .report-table td { padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .report-total { font-weight: 800; color: var(--accent); background: rgba(251,191,36,0.05); }
+
+    /* Layout Helpers */
+    .flex-between { display: flex; justify-content: space-between; align-items: center; }
+    .col-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    @media (max-width: 768px) { .col-2 { grid-template-columns: 1fr; } }
+
+    /* Professor Control Panel */
+    .prof-overlay {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.7); backdrop-filter: blur(8px);
+        display: flex; align-items: center; justify-content: center;
+        z-index: 9999; animation: fadeIn 0.3s ease;
+    }
+    .prof-lock-box {
+        background: var(--surface); border: 1px solid var(--accent);
+        border-radius: 20px; padding: 40px; text-align: center;
+        max-width: 380px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+    }
+    .prof-lock-box input {
+        width: 200px; height: 55px; background: rgba(0,0,0,0.4); border: 2px solid var(--border);
+        border-radius: 12px; color: var(--accent); font-size: 2rem; text-align: center;
+        letter-spacing: 12px; font-weight: 800; outline: none; transition: 0.3s;
+    }
+    .prof-lock-box input:focus { border-color: var(--accent); }
+    .prof-lock-box .error-msg { color: var(--danger); margin-top: 10px; font-size: 0.9rem; display: none; }
+
+    .macro-slider-group { margin-bottom: 18px; }
+    .macro-slider-group label { display: flex; justify-content: space-between; margin-bottom: 6px; color: var(--text-dim); font-size: 0.9rem; }
+    .macro-slider-group label span { color: var(--accent); font-weight: 700; }
+    .macro-slider {
+        -webkit-appearance: none; appearance: none; width: 100%; height: 8px;
+        background: rgba(255,255,255,0.1); border-radius: 8px; outline: none;
+        transition: 0.3s;
+    }
+    .macro-slider::-webkit-slider-thumb {
+        -webkit-appearance: none; appearance: none; width: 22px; height: 22px;
+        background: var(--accent); border-radius: 50%; cursor: pointer;
+        box-shadow: 0 0 10px rgba(251,191,36,0.4);
+    }
+    .macro-slider::-moz-range-thumb {
+        width: 22px; height: 22px; background: var(--accent);
+        border-radius: 50%; cursor: pointer; border: none;
+    }
+    .macro-impact-grid {
+        display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+        gap: 8px; margin-top: 15px;
+    }
+    .macro-impact-chip {
+        background: rgba(0,0,0,0.3); border: 1px solid var(--border);
+        border-radius: 10px; padding: 8px 10px; text-align: center; font-size: 0.8rem;
+    }
+    .macro-impact-chip .sector-name { color: var(--text-dim); }
+    .macro-impact-chip .sector-impact { font-weight: 700; font-size: 1rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <button class="back-btn" id="financeBackBtn" style="display: none;" onclick="closeSimPanel()">
+        <i class="fa-solid fa-arrow-right"></i> رجوع للمركز
+    </button>
+    <h2><i class="fa-solid fa-vault"></i> مركز القيادة المالي</h2>
+    <p id="hubSubtitle">مختبر المحاكاة المصرفية والتدريب الاستثماري</p>
+</div>
+
+<!-- Advisor Banner -->
+<div class="persona-banner" id="advisorBanner">
+    <div class="persona-avatar"><i class="fa-solid fa-user-tie"></i></div>
+    <div>
+        <h3 style="color: var(--samer-primary);">المستشار سامر يرحب بك</h3>
+        <p style="color: var(--text-dim);">الاستثمار الناجح يبدأ بالممارسة العلمية. اختر أياً من الأدوات المالية أدناه للبدء بتطوير مهاراتك المحاسبية والمصرفية.</p>
+    </div>
+</div>
+
+<!-- Hub Grid -->
+<div id="financeHub" class="finance-hub-grid">
+    <div class="hub-card" onclick="openSimPanel('sim-loan')">
+        <div class="hub-card-icon" style="background:rgba(59,130,246,0.15); color:#3b82f6;"><i class="fa-solid fa-hand-holding-dollar"></i></div>
+        <h4>حاسبة القروض</h4>
+        <p>حساب الأقساط والفوائد</p>
+    </div>
+    <div class="hub-card" onclick="openSimPanel('sim-savings')">
+        <div class="hub-card-icon" style="background:rgba(16,185,129,0.15); color:#10b981;"><i class="fa-solid fa-piggy-bank"></i></div>
+        <h4>حاسبة التوفير والاستثمار</h4>
+        <p>توقع الأرباح التراكمية</p>
+    </div>
+    <div class="hub-card" onclick="openSimPanel('sim-currency')">
+        <div class="hub-card-icon" style="background:rgba(245,158,11,0.15); color:#f59e0b;"><i class="fa-solid fa-money-bill-transfer"></i></div>
+        <h4>محول العملات</h4>
+        <p>متابعة أسعار الصرف الحية</p>
+    </div>
+    <div class="hub-card" onclick="openSimPanel('sim-stock')">
+        <div class="hub-card-icon" style="background:rgba(239,68,68,0.15); color:#ef4444;"><i class="fa-solid fa-chart-line"></i></div>
+        <h4>مقصورة البورصة</h4>
+        <p>تداول الأسهم وإدارة المحفظة</p>
+    </div>
+    <div class="hub-card" onclick="openSimPanel('sim-journal')">
+        <div class="hub-card-icon" style="background:rgba(236,72,153,0.15); color:#ec4899;"><i class="fa-solid fa-book-open"></i></div>
+        <h4>القيود المحاسبية</h4>
+        <p>تسجيل المدين والدائن</p>
+    </div>
+    <div class="hub-card" onclick="openSimPanel('sim-atm')">
+        <div class="hub-card-icon" style="background:rgba(34,197,94,0.15); color:#22c55e;"><i class="fa-solid fa-money-check-dollar"></i></div>
+        <h4>محاكاة صراف ATM</h4>
+        <p>تجربة الواجهة الرقمية للسحب</p>
+    </div>
+    <div class="hub-card" style="border-color: rgba(168,85,247,0.4);" onclick="openProfessorLogin()">
+        <div class="hub-card-icon" style="background:rgba(168,85,247,0.15); color:#a855f7;"><i class="fa-solid fa-user-shield"></i></div>
+        <h4>لوحة الأستاذ</h4>
+        <p>التحكم بالمتغيرات الاقتصادية</p>
+    </div>
+</div>
+
+<!-- ================= SIMULATION PANELS ================= -->
+
+<!-- 1. LOAN SIMULATOR (V5 MODERN) -->
+<div id="sim-loan" class="sim-detail-panel">
+    <div class="glass-card">
+        <div class="flex-between mb-20">
+            <h3><i class="fa-solid fa-hand-holding-dollar text-primary"></i> حاسبة القروض المصرفية المتطورة</h3>
+            <span class="badge" style="background:var(--primary-glow); color:var(--primary);">استهلاك تناقصي</span>
+        </div>
+        
+        <div class="col-2">
+            <div>
+                <div class="input-group"><label>مبلغ القرض (د.ع):</label><input type="number" id="loanAmount" class="form-control" value="10000000"></div>
+                <div class="input-group"><label>نسبة الفائدة السنوية (%):</label><input type="number" id="loanRate" class="form-control" value="8"></div>
+                <div class="input-group"><label>المدة (سنوات):</label><input type="number" id="loanYears" class="form-control" value="5"></div>
+                <button class="action-btn" onclick="runLoanSim()">📊 تحليل القرض</button>
+            </div>
+            <div style="height: 250px; background: rgba(0,0,0,0.2); border-radius: 15px; padding: 15px;">
+                <canvas id="loanChart"></canvas>
+            </div>
+        </div>
+        
+        <div id="loanRes" class="res-box" style="display: none; margin-top:20px;"></div>
+        
+        <div id="loanTableContainer" style="margin-top:20px; overflow-x:auto; display:none;">
+            <h4 class="mb-10">📅 جدول استهلاك الدين (أول 12 شهر)</h4>
+            <table class="finance-table" style="font-size:0.8rem;">
+                <thead>
+                    <tr><th>الشهر</th><th>القسط</th><th>الفائدة</th><th>الأصل</th><th>الرصيد المتبقي</th></tr>
+                </thead>
+                <tbody id="loanTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- 2. SAVINGS SIMULATOR (V5 MODERN) -->
+<div id="sim-savings" class="sim-detail-panel">
+    <div class="glass-card">
+        <div class="flex-between mb-20">
+            <h3><i class="fa-solid fa-piggy-bank text-success"></i> حاسبة النمو الاستثماري</h3>
+            <span class="badge" style="background:var(--samer-glow); color:var(--samer-primary);">الفائدة التراكمية</span>
+        </div>
+        
+        <div class="col-2">
+            <div style="height: 300px; background: rgba(0,0,0,0.2); border-radius: 15px; padding: 15px;">
+                <canvas id="savingsChart"></canvas>
+            </div>
+            <div>
+                <div class="input-group"><label>الإيداع الأولي (د.ع):</label><input type="number" id="savInitial" class="form-control" value="5000000"></div>
+                <div class="input-group"><label>الإيداع الشهري (د.ع):</label><input type="number" id="savMonthly" class="form-control" value="250000"></div>
+                <div class="input-group"><label>العائد السنوي المتوقع (%):</label><input type="number" id="savRate" class="form-control" value="12"></div>
+                <div class="input-group"><label>المدة (سنوات):</label><input type="number" id="savYears" class="form-control" value="10"></div>
+                <button class="action-btn" style="background:var(--success); color:white;" onclick="runSavingsSim()">📈 توقع النمو</button>
+            </div>
+        </div>
+        <div id="savRes" class="res-box" style="display: none; margin-top:20px;"></div>
+    </div>
+</div>
+
+<!-- 3. CURRENCY CONVERTER -->
+<div id="sim-currency" class="sim-detail-panel">
+    <div class="glass-card">
+        <h3><i class="fa-solid fa-money-bill-transfer text-accent"></i> محول العملات</h3>
+        <p class="mb-20 text-dim">أسعار صرف افتراضية لأغراض التدريب والتجارة.</p>
+        <div class="col-2">
+            <div class="input-group">
+                <label>الكمية:</label>
+                <input type="number" id="currAmount" class="form-control" value="100">
+            </div>
+            <div class="input-group">
+                <label>عملة التحويل:</label>
+                <select id="currPair" class="form-control">
+                    <option value="usd_iqd">من دولار (USD) إلى دينار (IQD)</option>
+                    <option value="iqd_usd">من دينار (IQD) إلى دولار (USD)</option>
+                    <option value="eur_iqd">من يورو (EUR) إلى دينار (IQD)</option>
+                </select>
+            </div>
+        </div>
+        <button class="action-btn" onclick="runCurrencySim()">تحويل</button>
+        <div id="currRes" class="res-box" style="display: none;"></div>
+    </div>
+</div>
+
+<!-- 4. STOCK EXCHANGE SIMULATOR (ADVANCED) -->
+<!-- 4. STOCK EXCHANGE SIMULATOR (MODERN TERMINAL V5) -->
+<div id="sim-stock" class="sim-detail-panel">
+    <div class="trading-terminal-container">
+        
+        <!-- Top Trading Ticker (Neon) -->
+        <div class="market-ticker-container" style="border-radius: var(--radius-sm); border-color: rgba(59,130,246,0.3);">
+            <div class="market-ticker" id="globalTickerV5">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+
+        <div class="trading-grid">
+            <!-- Left Sidebar: Assets List -->
+            <aside class="trading-sidebar-stocks" id="marketList">
+                <h4 class="mb-10 text-dim"><i class="fa-solid fa-list-ul"></i> قائمة الأصول</h4>
+                <div id="miniTickerList">
+                    <!-- Loaded via JS -->
+                </div>
+            </aside>
+
+            <!-- Center Panel: Large Chart & Terminal -->
+            <main class="main-chart-panel">
+                <div class="chart-header-info">
+                    <div class="current-asset-title">
+                        <div id="activeAssetIcon" class="stock-icon-box" style="width:55px; height:55px; background:var(--primary-glow); color:var(--primary); font-size:1.5rem;">
+                            <i class="fa-solid fa-chart-line"></i>
+                        </div>
+                        <div>
+                            <h2 id="activeAssetName">شركة التقنيات</h2>
+                            <span id="activeAssetSymbol" class="text-dim">TECH.I</span>
+                        </div>
+                    </div>
+                    <div class="text-left">
+                        <div id="activeAssetPrice" class="asset-price-large">0.00</div>
+                        <div id="activeAssetChange" class="price-change">+0.0%</div>
+                    </div>
+                </div>
+
+                <div style="flex: 1; min-height: 350px; position: relative;">
+                    <canvas id="mainTradingChart"></canvas>
+                </div>
+
+                <div class="samer-tip-card">
+                    <div class="samer-mini-avatar"><i class="fa-solid fa-robot"></i></div>
+                    <div>
+                        <small style="color:var(--samer-primary); font-weight:800;">رؤية سامر (AI Vision):</small>
+                        <p id="samerTradeAdvice" style="font-size:0.9rem;">اضغط على أي سهم من القائمة الجانبية لعرض تفاصيله وبدء التداول.</p>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Right Sidebar: Investor Status -->
+            <aside class="investor-panel">
+                <div class="glass-stat-card">
+                    <h5>الرصيد النقدي</h5>
+                    <div class="val"><span id="userCash">10,000,000</span> <small>د.ع</small></div>
+                </div>
+                
+                <div class="glass-stat-card" style="border-color: var(--primary);">
+                    <h5>قيمة المحفظة</h5>
+                    <div class="val"><span id="portfolioValue">0</span> <small>د.ع</small></div>
+                </div>
+
+                <div class="glass-stat-card" style="border-color: var(--success); flex:1; display:flex; flex-direction:column;">
+                    <h5 class="flex-between">محفظتي <i class="fa-solid fa-briefcase"></i></h5>
+                    <div id="myHoldingsList" style="flex:1; margin-top:10px; overflow-y:auto; max-height:300px;">
+                        <p class="text-dim text-center" style="margin-top:20px;">لا توجد أسهم حالياً</p>
+                    </div>
+                </div>
+                
+                <button class="action-btn" style="background:var(--surface-hover); color:white; border:1px solid var(--border);" onclick="refreshMarketV5()">
+                    <i class="fa-solid fa-sync"></i> تحديث السوق
+                </button>
+            </aside>
+        </div>
+    </div>
+</div>
+
+<!-- Trade Modal Overlay -->
+<div class="trade-modal-overlay" id="tradeModal" style="display:none;">
+    <div class="trade-modal">
+        <button class="close-modal" onclick="closeTradeModal()"><i class="fa-solid fa-xmark"></i></button>
+        <div class="trade-modal-header">
+            <div id="modalStockIcon" class="stock-icon-box" style="margin: 0 auto 15px; width:60px; height:60px; background:var(--accent-dim); color:var(--accent); font-size:1.8rem;">
+                <i class="fa-solid fa-coins"></i>
+            </div>
+            <h3 id="modalStockName">اسم الشركة</h3>
+            <span id="modalStockSymbol" class="text-dim">SYMBOL</span>
+        </div>
+
+        <div class="trade-input-group">
+            <label>الكمية المراد تداولها:</label>
+            <input type="number" id="tradeQty" value="10" min="1" oninput="calculateTradeTotal()">
+        </div>
+
+        <div class="trade-summary">
+            <div class="summary-row"><span>سعر السهم الحالي:</span> <b id="modalCurrentPrice">0</b></div>
+            <div class="summary-row total"><span>الإجمالي:</span> <b id="modalTotalPrice">0 د.ع</b></div>
+        </div>
+
+        <div class="trade-actions" id="tradeActionButtons">
+            <button class="btn-buy" onclick="executeTrade('buy')">شراء</button>
+            <button class="btn-sell" onclick="executeTrade('sell')">بيع</button>
+        </div>
+        <p id="tradeError" class="text-danger text-center mt-20" style="display:none; font-weight:700;"></p>
+    </div>
+</div>
+
+
+<!-- 5. ACCOUNTING CYCLE (ERP) SIMULATOR V5 -->
+<div id="sim-journal" class="sim-detail-panel">
+    <div class="glass-card">
+        <div class="flex-between">
+            <h3><i class="fa-solid fa-book-open" style="color:#ec4899;"></i> النظام المحاسبي المتكامل (المعيار المهني)</h3>
+            <div id="fiscalYearBadge" style="background:var(--accent-dim); color:var(--accent); padding:4px 10px; border-radius:8px; font-size:0.8rem; font-weight:800;">السنة المالية 2026</div>
+        </div>
+
+        <!-- Fiscal Timeline -->
+        <div style="display:flex; align-items:center; gap:20px; background:rgba(0,0,0,0.2); padding:15px; border-radius:15px; margin-bottom:20px;">
+            <div style="flex:1;">
+                <label style="font-size:0.8rem; color:var(--text-dim); display:block; margin-bottom:5px;">اختر الشهر:</label>
+                <div class="fiscal-timeline" id="fiscalTimeline"></div>
+            </div>
+            <div style="width:120px;">
+                <label style="font-size:0.8rem; color:var(--text-dim); display:block; margin-bottom:5px;">اليوم (التفصيلي):</label>
+                <select id="acctDaySelect" class="form-control" style="height:38px; font-size:0.9rem;" onchange="setFiscalDay(this.value)">
+                    <option value="all">كل الأيام</option>
+                    ${Array.from({length:31}, (_,i)=>`<option value="${i+1}">${i+1}</option>`).join('')}
+                </select>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div style="display:flex; gap:8px; margin-bottom:20px; border-bottom:1px solid var(--border); padding-bottom:12px; flex-wrap:wrap;">
+            <button class="acct-tab active" id="tab-journal" onclick="switchAcctTab('journal')">📒 دفتر اليومية</button>
+            <button class="acct-tab" id="tab-ledger" onclick="switchAcctTab('ledger')">📚 دفتر الأستاذ</button>
+            <button class="acct-tab" id="tab-trial" onclick="switchAcctTab('trial')">⚖️ ميزان المراجعة</button>
+            <button class="acct-tab" id="tab-reports" onclick="switchAcctTab('reports')">📊 القوائم الختامية</button>
+        </div>
+
+        <!-- Pane 1: Professional Journal (Compound Entry) -->
+        <div id="acct-journal" class="acct-pane">
+            <div class="acct-form-container">
+                <div class="acct-header-row">
+                    <div class="input-group">
+                        <label>تاريخ العملية:</label>
+                        <input type="date" id="jTxDate" class="acct-input">
+                    </div>
+                    <div class="input-group">
+                        <label>رقم القيد / المرجع:</label>
+                        <input type="text" id="jRef" class="acct-input" placeholder="مثلاً: JV-001" readonly>
+                    </div>
+                    <div class="input-group">
+                        <label>البيان (شرح العملية):</label>
+                        <input type="text" id="jDesc" class="acct-input" placeholder="اكتب شرحاً وافياً للعملية المحاسبية...">
+                    </div>
+                </div>
+
+                <div style="overflow-x:auto;">
+                    <table class="compound-entry-table">
+                        <thead>
+                            <tr>
+                                <th style="width:40%;">اسم الحساب</th>
+                                <th style="width:25%;">مدين (د.ع)</th>
+                                <th style="width:25%;">دائن (د.ع)</th>
+                                <th style="width:10%;"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="compoundRows">
+                            <!-- Dynamic rows via JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <button class="mini-btn" style="background:rgba(59,130,246,0.1); color:var(--primary); border:1px solid var(--primary);" onclick="addCompoundRow()">
+                        <i class="fa-solid fa-plus"></i> إضافة سطر جديد
+                    </button>
+                    <div class="balance-checker" id="balanceChecker">
+                        <span>إجمالي المدين: <span id="totalDebit">0</span></span>
+                        <span style="margin: 0 20px;">|</span>
+                        <span>إجمالي الدائن: <span id="totalCredit">0</span></span>
+                    </div>
+                </div>
+
+                <div style="display:flex; gap:10px; margin-top:10px;">
+                    <button class="action-btn" style="flex:1;" onclick="postCompoundJournal()">✅ ترحيل وحفظ القيد المعياري</button>
+                    <button class="action-btn" style="flex:0.35; background:var(--danger);" onclick="clearJournalDB()">🗑️ إعادة تهيئة الدفاتر</button>
+                </div>
+            </div>
+
+            <div id="journalRes" class="res-box" style="display:none; margin-top:12px;"></div>
+            
+            <h4 style="margin-top:25px; margin-bottom:10px;">📋 مسرد العمليات المالية (دفتر اليومية المجمع)</h4>
+            <div style="overflow-x:auto;">
+                <table class="finance-table">
+                    <thead>
+                        <tr>
+                            <th>التاريخ</th>
+                            <th>البيان</th>
+                            <th>الحساب</th>
+                            <th>مدين</th>
+                            <th>دائن</th>
+                        </tr>
+                    </thead>
+                    <tbody id="journalTableBody">
+                        <tr><td colspan="5" class="text-dim text-center">جار التحميل...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Pane 2: Standard Ledger (T-Accounts) -->
+        <div id="acct-ledger" class="acct-pane" style="display:none;">
+            <div class="flex-between mb-20">
+                <p class="text-dim">دفتر الأستاذ: ترحيلات تفصيلية لكل حساب بشكل جرد مستمر.</p>
+                <button class="mini-btn" style="background:var(--primary); color:white;" onclick="renderStandardLedger()">🔄 تحديث الترحيلات</button>
+            </div>
+            <div id="ledger-grid" class="ledger-grid">
+                <!-- T-Accounts via JS -->
+            </div>
+        </div>
+
+        <!-- Pane 3: Trial Balance (ميزان المراجعة) -->
+        <div id="acct-trial" class="acct-pane" style="display:none;">
+            <div class="flex-between mb-20">
+                <p class="text-dim">ميزان المراجعة: فحص توازن الأرصدة قبل إعداد القوائم الختامية.</p>
+                <button class="mini-btn" style="background:var(--accent); color:var(--bg);" onclick="renderTrialBalance()">⚖️ فحص التوازن</button>
+            </div>
+            <div style="overflow-x:auto;">
+                <table class="finance-table trial-balance-table">
+                    <thead>
+                        <tr>
+                            <th>اسم الحساب</th>
+                            <th style="text-align:center;">أرصدة مدينة</th>
+                            <th style="text-align:center;">أرصدة دائنة</th>
+                        </tr>
+                    </thead>
+                    <tbody id="trialBalanceBody">
+                        <!-- Rows via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Pane 4: Standard Financial Reports -->
+        <div id="acct-reports" class="acct-pane" style="display:none;">
+            <div class="flex-between mb-20">
+                <p class="text-dim">التقارير الختامية: قائمة الدخل والميزانية العمومية وفق المعايير.</p>
+                <button class="mini-btn" style="background:var(--success); color:white;" onclick="renderStandardReports()">📊 إصدار التقارير</button>
+            </div>
+            <div class="col-2" id="reports-content" style="gap:20px;">
+                <!-- Financial Statements -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 6. ATM SIMULATOR (ADVANCED NUMPAD) -->
+<div id="sim-atm" class="sim-detail-panel">
+    <div class="glass-card" style="background: rgba(2, 6, 23, 0.9); border: 2px solid #334155; position: relative;">
+        <!-- ATM Screen -->
+        <div class="atm-screen">
+            <h2 id="atmDisplayTitle">مرحباً بك في مصرف الرافدين الافتراضي</h2>
+            <br>
+            <p>الرصيد المتوفر:</p>
+            <h1 id="atmDisplayBalance">5,000,000 د.ع</h1>
+            <br>
+            <p id="atmDisplayInput" style="color: #fbbf24; font-size: 1.5rem; height: 30px;"></p>
+        </div>
+        
+        <!-- Numpad -->
+        <div class="numpad">
+            <button class="num-key" onclick="atmType(1)">1</button>
+            <button class="num-key" onclick="atmType(2)">2</button>
+            <button class="num-key" onclick="atmType(3)">3</button>
+            <button class="num-key" onclick="atmType(4)">4</button>
+            <button class="num-key" onclick="atmType(5)">5</button>
+            <button class="num-key" onclick="atmType(6)">6</button>
+            <button class="num-key" onclick="atmType(7)">7</button>
+            <button class="num-key" onclick="atmType(8)">8</button>
+            <button class="num-key" onclick="atmType(9)">9</button>
+            <button class="num-key" style="background: #ef4444;" onclick="atmClear()">مسح</button>
+            <button class="num-key" onclick="atmType(0)">0</button>
+            <button class="num-key" onclick="atmType('000')">000</button>
+        </div>
+        
+        <div class="atm-actions">
+            <button class="action-btn" style="background: #10b981;" onclick="atmProcess('deposit')">إيداع</button>
+            <button class="action-btn" style="background: #ef4444;" onclick="atmProcess('withdraw')">سحب نقد</button>
+        </div>
+    </div>
+</div>
+
+<!-- 7. PROFESSOR CONTROL PANEL -->
+<div id="sim-professor" class="sim-detail-panel">
+    <div class="glass-card" style="border-color: rgba(168,85,247,0.3);">
+        <div class="flex-between mb-20">
+            <h3><i class="fa-solid fa-user-shield" style="color:#a855f7;"></i> لوحة تحكم الأستاذ — المتغيرات الاقتصادية الكلية</h3>
+            <button class="mini-btn" style="background:rgba(168,85,247,0.2); color:#a855f7; border:1px solid #a855f7; font-size:0.85rem;" onclick="lockProfessor()">
+                <i class="fa-solid fa-lock"></i> قفل
+            </button>
+        </div>
+        <p class="text-dim mb-20">تغيير هذه المتغيرات سيؤثر مباشرة على أسعار الأسهم في البورصة وفقاً للنماذج الاقتصادية الحقيقية.</p>
+
+        <div class="col-2">
+            <div>
+                <div class="macro-slider-group">
+                    <label>نسبة التضخم (Inflation) <span id="val_inflation">2.0%</span></label>
+                    <input type="range" class="macro-slider" id="sl_inflation" min="0" max="25" step="0.5" value="2" oninput="updateSliderVal('inflation')">
+                </div>
+                <div class="macro-slider-group">
+                    <label>مؤشر الركود (Recession) <span id="val_recession">0.0%</span></label>
+                    <input type="range" class="macro-slider" id="sl_recession" min="0" max="10" step="0.5" value="0" oninput="updateSliderVal('recession')">
+                </div>
+                <div class="macro-slider-group">
+                    <label>الإنفاق الحكومي (Spending) <span id="val_spending">50%</span></label>
+                    <input type="range" class="macro-slider" id="sl_spending" min="0" max="100" step="5" value="50" oninput="updateSliderVal('spending')">
+                </div>
+            </div>
+            <div>
+                <div class="macro-slider-group">
+                    <label>نسبة الضرائب (Taxes) <span id="val_taxes">15%</span></label>
+                    <input type="range" class="macro-slider" id="sl_taxes" min="0" max="50" step="1" value="15" oninput="updateSliderVal('taxes')">
+                </div>
+                <div class="macro-slider-group">
+                    <label>سعر الفائدة (Interest Rate) <span id="val_interest_rate">5.0%</span></label>
+                    <input type="range" class="macro-slider" id="sl_interest_rate" min="0" max="25" step="0.5" value="5" oninput="updateSliderVal('interest_rate')">
+                </div>
+            </div>
+        </div>
+
+        <button class="action-btn mt-20" style="background: #a855f7;" onclick="applyEconomyChanges()">
+            <i class="fa-solid fa-bolt"></i> تطبيق التغييرات على السوق
+        </button>
+        <div id="profRes" class="res-box" style="display:none; margin-top:15px;"></div>
+
+        <!-- Sector Impact Preview -->
+        <h4 style="margin-top:25px; color:#a855f7;">التأثير المتوقع على القطاعات</h4>
+        <div class="macro-impact-grid" id="impactPreview"></div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // === 📊 MarketStore: مُحرك البورصة الحديثة v5 (Premium Edition) ===
+    const MarketStore = {
+        cash: 10000000,
+        portfolio: [], // {id, qty, avgPrice}
+        stocks: [
+            { id: 1, name: "مستشفى الكفيل", symbol: "KFHL", price: 5200, change: 0, type: 'health', history: [5100, 5150, 5200], icon: 'fa-hospital' },
+            { id: 2, name: "مصرف بغداد", symbol: "BGD", price: 1250, change: 0, type: 'bank', history: [1300, 1280, 1250], icon: 'fa-building-columns' },
+            { id: 3, name: "اسيا سيل", symbol: "ASIA", price: 8900, change: 0, type: 'telecom', history: [8600, 8700, 8900], icon: 'fa-tower-cell' },
+            { id: 4, name: "زين العراق", symbol: "ZAIN", price: 4100, change: 0, type: 'telecom', history: [4000, 4050, 4100], icon: 'fa-mobile-screen' },
+            { id: 5, name: "نفط الوسط", symbol: "MOIL", price: 15600, change: 0, type: 'energy', history: [16000, 15800, 15600], icon: 'fa-oil-well' },
+            { id: 6, name: "الخطوط الجوية", symbol: "IAIR", price: 3200, change: 0, type: 'transport', history: [3200, 3180, 3200], icon: 'fa-plane' },
+            { id: 7, name: "الذهب العراقي", symbol: "GOLD", price: 485000, change: 0, type: 'commodity', history: [465000, 475000, 485000], icon: 'fa-coins' },
+            { id: 8, name: "سعر الدولار", symbol: "USD", price: 1500, change: 0, type: 'commodity', history: [1480, 1490, 1500], icon: 'fa-dollar-sign' }
+        ],
+        activeIndex: 0,
+        chart: null,
+        econState: { inflation: 2, recession: 0, spending: 50, taxes: 15, interest_rate: 5 }
+    };
+
+    // --- Core Navigation ---
+    function openSimPanel(id) {
+        try {
+            document.getElementById('financeHub').style.display = 'none';
+            const banner = document.getElementById('advisorBanner');
+            if(banner) banner.style.display = 'none';
+            const sub = document.getElementById('hubSubtitle');
+            if(sub) sub.style.display = 'none';
+            const backBtn = document.getElementById('financeBackBtn');
+            if(backBtn) backBtn.style.display = 'inline-block';
+            
+            // Kiosk Bug Fix: avoid using .forEach on querySelectorAll for older WebView support
+            const panels = document.querySelectorAll('.sim-detail-panel');
+            for (var i = 0; i < panels.length; i++) {
+                panels[i].style.display = 'none';
+            }
+            
+            const targetPanel = document.getElementById(id);
+            if(targetPanel) targetPanel.style.display = 'block';
+            else alert('عذراً، لم يتم العثور على لوحة المحاكاة: ' + id);
+            
+            if (id === 'sim-stock') initTradingTerminal();
+        } catch (e) {
+            alert('حدث خطأ أثناء فتح المحاكاة: ' + e.message);
+        }
+    }
+
+    function closeSimPanel() {
+        const panels = document.querySelectorAll('.sim-detail-panel');
+        for (var i = 0; i < panels.length; i++) {
+            panels[i].style.display = 'none';
+        }
+        document.getElementById('financeHub').style.display = 'grid';
+        document.getElementById('advisorBanner').style.display = 'flex';
+        document.getElementById('hubSubtitle').style.display = 'block';
+        document.getElementById('financeBackBtn').style.display = 'none';
+    }
+
+    // --- Modern Trading Terminal Logic ---
+    function initTradingTerminal() {
+        fetchEconomyState();
+        renderMiniTicker();
+        selectAsset(0);
+        updateInvestorUI();
+        startMarketSimulation();
+    }
+
+    function renderMiniTicker() {
+        const container = document.getElementById('miniTickerList');
+        const ticker = document.getElementById('globalTickerV5');
+        
+        container.innerHTML = MarketStore.stocks.map((s, idx) => `
+            <div class="stock-card-mini ${idx === MarketStore.activeIndex ? 'active' : ''}" onclick="selectAsset(${idx})">
+                <div class="stock-icon-box"><i class="fa-solid ${s.icon}"></i></div>
+                <div class="stock-info-mini">
+                    <span class="stock-name-mini">${s.name}</span>
+                    <span class="stock-symbol-mini">${s.symbol}</span>
+                </div>
+                <div class="stock-price-mini">
+                    <span class="price-val">${s.price.toLocaleString()}</span>
+                    <span class="price-change ${s.change >= 0 ? 'gain-glow' : 'loss-glow'}">${s.change > 0 ? '+' : ''}${s.change}%</span>
+                </div>
+            </div>
+        `).join('');
+
+        ticker.innerHTML = MarketStore.stocks.map(s => `
+            <span class="ticker-item" style="margin-left:40px;">
+                ${s.symbol}: <b class="${s.change >= 0 ? 'text-success' : 'text-danger'}">${s.price.toLocaleString()} ${s.change >= 0 ? '▲' : '▼'}</b>
+            </span>
+        `).join('');
+    }
+
+    function selectAsset(idx) {
+        MarketStore.activeIndex = idx;
+        const s = MarketStore.stocks[idx];
+        
+        document.getElementById('activeAssetName').innerText = s.name;
+        document.getElementById('activeAssetSymbol').innerText = s.symbol;
+        document.getElementById('activeAssetPrice').innerText = s.price.toLocaleString();
+        document.getElementById('activeAssetChange').innerText = `${s.change > 0 ? '+' : ''}${s.change}%`;
+        document.getElementById('activeAssetChange').className = `price-change ${s.change >= 0 ? 'gain-glow' : 'loss-glow'}`;
+        document.getElementById('activeAssetIcon').innerHTML = `<i class="fa-solid ${s.icon}"></i>`;
+        
+        // Advisor Logic (Advisor Samer)
+        let advice = "السوق مستقر حالياً.";
+        if (s.change > 2) advice = "📈 صعود قوي! سامر ينصح بالتروي قبل الشراء عند القمة.";
+        else if (s.change < -2) advice = "📉 انخفاض ملحوظ. هل هي فرصة للشراء بسعر رخيص للمستثمر الصبور؟";
+        document.getElementById('samerTradeAdvice').innerText = advice;
+
+        updateMainChart(s);
+        renderMiniTicker();
+    }
+
+    function updateMainChart(stock) {
+        const ctx = document.getElementById('mainTradingChart').getContext('2d');
+        if (MarketStore.chart) MarketStore.chart.destroy();
+        
+        const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+        gradient.addColorStop(0, stock.change >= 0 ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)');
+        gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+
+        MarketStore.chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: stock.history.map((_, i) => i),
+                datasets: [{
+                    label: stock.symbol,
+                    data: stock.history,
+                    borderColor: stock.change >= 0 ? '#10b981' : '#ef4444',
+                    borderWidth: 4,
+                    pointRadius: 0,
+                    pointHoverRadius: 6,
+                    backgroundColor: gradient,
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false } },
+                scales: {
+                    x: { display: false },
+                    y: { 
+                        grid: { color: 'rgba(255,255,255,0.05)' },
+                        ticks: { color: 'rgba(255,255,255,0.4)', font: { size: 10 } }
+                    }
+                }
+            }
+        });
+    }
+
+    function updateInvestorUI() {
+        document.getElementById('userCash').innerText = MarketStore.cash.toLocaleString();
+        
+        let portfolioValue = 0;
+        const holdingsContainer = document.getElementById('myHoldingsList');
+        
+        if (MarketStore.portfolio.length === 0) {
+            holdingsContainer.innerHTML = '<p class="text-dim text-center" style="margin-top:20px;">لا توجد أسهم حالياً</p>';
+        } else {
+            holdingsContainer.innerHTML = MarketStore.portfolio.map(p => {
+                const stock = MarketStore.stocks.find(s => s.id === p.id);
+                const currentVal = p.qty * stock.price;
+                portfolioValue += currentVal;
+                const profit = currentVal - (p.qty * p.avgPrice);
+                return `
+                    <div class="stock-card-mini" style="margin-bottom:8px; cursor:default; border-left: 3px solid ${profit >= 0 ? 'var(--success)' : 'var(--danger)'}">
+                        <div class="stock-info-mini">
+                            <span class="stock-name-mini">${stock.name}</span>
+                            <span class="stock-symbol-mini">${p.qty} سهم | ق.ع: ${Math.round(p.avgPrice).toLocaleString()}</span>
+                        </div>
+                        <div class="stock-price-mini">
+                            <span class="price-val">${currentVal.toLocaleString()}</span>
+                            <span class="price-change ${profit >= 0 ? 'text-success' : 'text-danger'}">${profit >= 0 ? '+' : ''}${Math.round(profit).toLocaleString()}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        document.getElementById('portfolioValue').innerText = portfolioValue.toLocaleString();
+    }
+
+    // --- Trade Modal UI Logic ---
+    let currentTradeStock = null;
+
+    function openTradeModal() {
+        const s = MarketStore.stocks[MarketStore.activeIndex];
+        currentTradeStock = s;
+        
+        document.getElementById('modalStockName').innerText = s.name;
+        document.getElementById('modalStockSymbol').innerText = s.symbol;
+        document.getElementById('modalStockIcon').innerHTML = `<i class="fa-solid ${s.icon}"></i>`;
+        document.getElementById('modalCurrentPrice').innerText = s.price.toLocaleString();
+        document.getElementById('tradeQty').value = 10;
+        
+        calculateTradeTotal();
+        document.getElementById('tradeModal').style.display = 'flex';
+        document.getElementById('tradeError').style.display = 'none';
+    }
+
+    function closeTradeModal() {
+        document.getElementById('tradeModal').style.display = 'none';
+        currentTradeStock = null;
+    }
+
+    function calculateTradeTotal() {
+        const qty = parseInt(document.getElementById('tradeQty').value) || 0;
+        if (currentTradeStock) {
+            const total = qty * currentTradeStock.price;
+            document.getElementById('modalTotalPrice').innerText = total.toLocaleString() + " د.ع";
+        }
+    }
+
+    async function executeTrade(type) {
+        const qty = parseInt(document.getElementById('tradeQty').value);
+        if(!qty || qty <= 0) return;
+        
+        const total = qty * currentTradeStock.price;
+        const errorEl = document.getElementById('tradeError');
+        errorEl.style.display = 'none';
+
+        if (type === 'buy') {
+            if (total > MarketStore.cash) {
+                errorEl.innerText = "❌ عذراً، رصيدك النقدي لا يكفي لإتمام الشراء.";
+                errorEl.style.display = 'block';
+                return;
+            }
+            MarketStore.cash -= total;
+            const existing = MarketStore.portfolio.find(p => p.id === currentTradeStock.id);
+            if (existing) {
+                const oldCost = existing.qty * existing.avgPrice;
+                existing.qty += qty;
+                existing.avgPrice = (oldCost + total) / existing.qty;
+            } else {
+                MarketStore.portfolio.push({ id: currentTradeStock.id, qty: qty, avgPrice: currentTradeStock.price });
+            }
+        } else {
+            const existing = MarketStore.portfolio.find(p => p.id === currentTradeStock.id);
+            if (!existing || existing.qty < qty) {
+                errorEl.innerText = "❌ عذراً، لا تملك هذه الكمية من المحفظة للبيع.";
+                errorEl.style.display = 'block';
+                return;
+            }
+            MarketStore.cash += total;
+            existing.qty -= qty;
+            if (existing.qty === 0) {
+                MarketStore.portfolio = MarketStore.portfolio.filter(p => p.id !== currentTradeStock.id);
+            }
+        }
+        
+        updateInvestorUI();
+        closeTradeModal();
+        // Visual feedback
+        const toast = document.createElement('div');
+        toast.style = "position:fixed; bottom:20px; right:20px; background:var(--success); color:white; padding:15px 30px; border-radius:12px; z-index:9999; animation:fadeIn 0.3s;";
+        toast.innerHTML = `✅ تم تنفيذ عملية ${type === 'buy' ? 'شراء' : 'بيع'} بنجاح.`;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
+
+    function startMarketSimulation() {
+        if (window.marketTimer) clearInterval(window.marketTimer);
+        window.marketTimer = setInterval(() => {
+            const econ = MarketStore.econState;
+            const inflationImpact = (econ.inflation - 2) / 5;
+            const recessionImpact = econ.recession / 3;
+            const interestImpact = (econ.interest_rate - 5) / 5;
+
+            MarketStore.stocks.forEach(s => {
+                let sectorModifier = 0;
+                if(s.type === 'bank') sectorModifier += interestImpact * 1.5 - recessionImpact * 2;
+                if(s.type === 'energy') sectorModifier += inflationImpact * 1.2;
+                if(s.type === 'commodity') sectorModifier += inflationImpact * 2.0;
+                
+                const volatility = s.type === 'commodity' ? 0.015 : 0.04;
+                const naturalNoise = (Math.random() - 0.48) * volatility;
+                const changeP = (naturalNoise + sectorModifier/100);
+                
+                const oldPrice = s.price;
+                s.price = Math.round(s.price * (1 + changeP));
+                if(s.price < 10) s.price = 10;
+                s.change = parseFloat(((s.price - oldPrice) / oldPrice * 100).toFixed(2));
+                
+                s.history.push(s.price);
+                if (s.history.length > 30) s.history.shift();
+            });
+
+            const active = MarketStore.stocks[MarketStore.activeIndex];
+            document.getElementById('activeAssetPrice').innerText = active.price.toLocaleString();
+            document.getElementById('activeAssetChange').innerText = `${active.change > 0 ? '+' : ''}${active.change}%`;
+            document.getElementById('activeAssetChange').className = `price-change ${active.change >= 0 ? 'gain-glow' : 'loss-glow'}`;
+            
+            if (MarketStore.chart) {
+                MarketStore.chart.data.datasets[0].data = active.history;
+                MarketStore.chart.data.datasets[0].borderColor = active.change >= 0 ? '#10b981' : '#ef4444';
+                MarketStore.chart.update('none');
+            }
+            updateInvestorUI();
+            renderMiniTicker();
+        }, 5000);
+    }
+
+    // --- 1. LOAN SIMULATOR LOGIC (V5) ---
+    let loanChartObj = null;
+    function runLoanSim() {
+        const amount = parseFloat(document.getElementById('loanAmount').value);
+        const annualRate = parseFloat(document.getElementById('loanRate').value) / 100;
+        const years = parseFloat(document.getElementById('loanYears').value);
+        
+        const monthlyRate = annualRate / 12;
+        const nPayments = years * 12;
+        const monthlyPayment = (amount * monthlyRate) / (1 - Math.pow(1 + monthlyRate, -nPayments));
+        const totalPayment = monthlyPayment * nPayments;
+        const totalInterest = totalPayment - amount;
+
+        const resBox = document.getElementById('loanRes');
+        resBox.style.display = 'block';
+        resBox.innerHTML = `
+            <div style="font-size:1.1rem; line-height:1.8;">
+                <p>💰 القسط الشهري: <b>${Math.round(monthlyPayment).toLocaleString()} د.ع</b></p>
+                <p>📈 إجمالي الفوائد: <span style="color:var(--danger)">${Math.round(totalInterest).toLocaleString()} د.ع</span></p>
+                <p>🏦 إجمالي ما سيتم سداده: <b>${Math.round(totalPayment).toLocaleString()} د.ع</b></p>
+            </div>
+        `;
+
+        // Render Amortization Table & Chart
+        let balance = amount;
+        const chartData = [];
+        const tableBody = document.getElementById('loanTableBody');
+        tableBody.innerHTML = "";
+        
+        for (let i = 1; i <= nPayments; i++) {
+            const interest = balance * monthlyRate;
+            const principal = monthlyPayment - interest;
+            balance -= principal;
+            
+            if (i <= 12) {
+                tableBody.innerHTML += `<tr><td>${i}</td><td>${Math.round(monthlyPayment).toLocaleString()}</td><td>${Math.round(interest).toLocaleString()}</td><td>${Math.round(principal).toLocaleString()}</td><td>${Math.max(0, Math.round(balance)).toLocaleString()}</td></tr>`;
+            }
+            chartData.push(Math.max(0, balance));
+        }
+        document.getElementById('loanTableContainer').style.display = 'block';
+
+        // Chart.js
+        const ctx = document.getElementById('loanChart').getContext('2d');
+        if (loanChartObj) loanChartObj.destroy();
+        loanChartObj = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: Array.from({length: nPayments}, (_, i) => i + 1),
+                datasets: [{
+                    label: 'رصيد القرض المتبقي',
+                    data: chartData,
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    fill: true,
+                    tension: 0.1
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+        });
+    }
+
+    // --- 2. SAVINGS SIMULATOR LOGIC (V5) ---
+    let savingsChartObj = null;
+    function runSavingsSim() {
+        const initial = parseFloat(document.getElementById('savInitial').value);
+        const monthly = parseFloat(document.getElementById('savMonthly').value);
+        const annualRate = parseFloat(document.getElementById('savRate').value) / 100;
+        const years = parseInt(document.getElementById('savYears').value);
+        
+        let total = initial;
+        const history = [initial];
+        const monthlyRate = annualRate / 12;
+        
+        for (let m = 1; m <= years * 12; m++) {
+            total = (total + monthly) * (1 + monthlyRate);
+            if (m % 12 === 0) history.push(total);
+        }
+
+        const resBox = document.getElementById('savRes');
+        resBox.style.display = 'block';
+        resBox.innerHTML = `
+            <div style="font-size:1.1rem; line-height:1.8;">
+                <p>💎 القيمة المستقبلية: <b style="color:var(--success); font-size:1.4rem;">${Math.round(total).toLocaleString()} د.ع</b></p>
+                <p>📈 إجمالي العائد المحقق: <b>${Math.round(total - (initial + monthly * years * 12)).toLocaleString()} د.ع</b></p>
+            </div>
+        `;
+
+        const ctx = document.getElementById('savingsChart').getContext('2d');
+        if (savingsChartObj) savingsChartObj.destroy();
+        savingsChartObj = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: Array.from({length: years + 1}, (_, i) => `سنة ${i}`),
+                datasets: [{
+                    label: 'نمو المحفظة',
+                    data: history,
+                    backgroundColor: '#10b981',
+                    borderRadius: 5
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+    }
+
+    async function fetchEconomyState() {
+        try {
+            const res = await fetch('/api/simulation/economy');
+            const data = await res.json();
+            if (data && !data.error) { MarketStore.econState = data; }
+        } catch(e) {}
+    }
+
+
+    // --- 3. Currency Sim ---
+    function runCurrencySim() {
+        const amt = parseFloat(document.getElementById('currAmount').value);
+        const pair = document.getElementById('currPair').value;
+        const resBox = document.getElementById('currRes');
+        const rates = { "usd_iqd": 1500, "iqd_usd": 1/1500, "eur_iqd": 1650 };
+        if (!amt) return;
+        const res = amt * rates[pair];
+        resBox.style.display = 'block';
+        resBox.innerHTML = `النتيجة: <b>${res.toLocaleString(undefined,{maximumFractionDigits:2})}</b>`;
+    }
+
+    // --- 5. PROFESSIONAL ACCOUNTING CYCLE (ERP V5) ---
+    const acctState = {
+        months: ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"],
+        currentMonth: 0, // 0-indexed (Jan)
+        currentDay: 'all', // Fix: was undefined, causing bad date generation
+        accounts: [
+            "الصندوق", "المصرف", "المخزون", "المدينون (العملاء)", "الأثاث", "المعدات", "العقارات", 
+            "الدائنون (الموردون)", "القروض", "رأس المال", 
+            "المبيعات", "إيرادات أخرى",
+            "المشتريات", "مصروف الرواتب", "مصروف الإيجار", "مصروف الاندثار", "مصاريف عمومية"
+        ]
+    };
+
+    async function initFiscalTimeline() {
+        const tl = document.getElementById('fiscalTimeline');
+        tl.innerHTML = acctState.months.map((m, i) => {
+            const isActive = i === acctState.currentMonth;
+            return `
+                <div class="month-pill ${isActive ? 'active' : ''}" onclick="setFiscalMonth(${i})">
+                    <div style="font-weight:800;">${m}</div>
+                    <div style="font-size:0.6rem; opacity:0.8;">السنة المالية 26</div>
+                </div>
+            `;
+        }).join('');
+        document.getElementById('jTxDate').value = `2026-${String(acctState.currentMonth+1).padStart(2,'0')}-${String(acctState.currentDay === 'all' ? 1 : acctState.currentDay).padStart(2,'0')}`;
+    }
+
+    function setFiscalMonth(m) {
+        acctState.currentMonth = m;
+        initFiscalTimeline();
+        loadJournalEntries();
+    }
+
+    function setFiscalDay(d) {
+        acctState.currentDay = d === 'all' ? 'all' : parseInt(d);
+        initFiscalTimeline();
+        loadJournalEntries();
+    }
+
+    let compoundRowCount = 0;
+    function addCompoundRow(acc = "", deb = 0, cre = 0) {
+        const tbody = document.getElementById('compoundRows');
+        const tr = document.createElement('tr');
+        tr.id = `row-${compoundRowCount++}`;
+        tr.innerHTML = `
+            <td>
+                <select class="acct-input row-acc">
+                    ${acctState.accounts.map(a => `<option value="${a}" ${a === acc ? 'selected' : ''}>${a}</option>`).join('')}
+                </select>
+            </td>
+            <td><input type="number" class="acct-input row-debit" value="${deb}" oninput="calculateEntryBalance()"></td>
+            <td><input type="number" class="acct-input row-credit" value="${cre}" oninput="calculateEntryBalance()"></td>
+            <td><button class="mini-btn" style="color:var(--danger);" onclick="this.closest('tr').remove(); calculateEntryBalance();"><i class="fa-solid fa-trash"></i></button></td>
+        `;
+        tbody.appendChild(tr);
+        calculateEntryBalance();
+    }
+
+    function calculateEntryBalance() {
+        let deb = 0; let cre = 0;
+        document.querySelectorAll('.row-debit').forEach(i => deb += parseFloat(i.value || 0));
+        document.querySelectorAll('.row-credit').forEach(i => cre += parseFloat(i.value || 0));
+        document.getElementById('totalDebit').innerText = deb.toLocaleString();
+        document.getElementById('totalCredit').innerText = cre.toLocaleString();
+        
+        const checker = document.getElementById('balanceChecker');
+        if (deb === cre && deb > 0) {
+            checker.className = "balance-checker balance-ok";
+        } else {
+            checker.className = "balance-checker balance-error";
+        }
+        return { deb, cre };
+    }
+
+    async function postCompoundJournal() {
+        const { deb, cre } = calculateEntryBalance();
+        if (deb !== cre || deb === 0) { alert("❌ القيد غير متوازن! يجب أن يتساوى مجموع المدين مع مجموع الدائن."); return; }
+        
+        const tx_date = document.getElementById('jTxDate').value;
+        const description = document.getElementById('jDesc').value;
+        const lines = [];
+        document.querySelectorAll('#compoundRows tr').forEach(tr => {
+            lines.push({
+                account: tr.querySelector('.row-acc').value,
+                debit: parseFloat(tr.querySelector('.row-debit').value || 0),
+                credit: parseFloat(tr.querySelector('.row-credit').value || 0)
+            });
+        });
+
+        try {
+            const res = await fetch('/api/finance/journal', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ tx_date, description, lines })
+            });
+            const d = await res.json();
+            if (d.status === 'success') {
+                document.getElementById('journalRes').style.display = 'block';
+                document.getElementById('journalRes').innerText = "✅ تم ترحيل القيد المعياري بنجاح.";
+                document.getElementById('compoundRows').innerHTML = "";
+                document.getElementById('jDesc').value = "";
+                addCompoundRow(); addCompoundRow(); // Reset starting rows
+                loadJournalEntries();
+            } else {
+                alert("⚠️ حدث خطأ من الخادم: " + (d.message || 'خطأ غير معروف'));
+            }
+        } catch(e) {
+            alert("❌ تعذر الاتصال بالخادم. تأكد من تشغيل السيرفر (server.py).");
+            console.error('postCompoundJournal error:', e);
+        }
+    }
+
+    async function loadJournalEntries() {
+        const body = document.getElementById('journalTableBody');
+        try {
+            const res = await fetch('/api/finance/journal');
+            if (!res.ok) throw new Error('Server returned ' + res.status);
+            const data = await res.json();
+            // Filter by current month
+            const filtered = data.filter(e => {
+                const m = new Date(e.tx_date).getMonth();
+                return m === acctState.currentMonth;
+            });
+
+            if (filtered.length === 0) {
+                body.innerHTML = '<tr><td colspan="5" class="text-dim text-center">لا توجد قيود مسجلة لهذا الشهر.</td></tr>';
+                return;
+            }
+
+            let html = "";
+            let currentGroup = "";
+            filtered.forEach(e => {
+                const isNewGroup = e.tx_group_id !== currentGroup;
+                html += `
+                    <tr style="${isNewGroup ? 'border-top:2px solid var(--border);' : ''}">
+                        <td>${isNewGroup ? e.tx_date : ''}</td>
+                        <td style="font-size:0.8rem; max-width:150px;">${isNewGroup ? e.description : ''}</td>
+                        <td>${e.account_name}</td>
+                        <td style="color:var(--success); font-weight:700;">${e.debit > 0 ? e.debit.toLocaleString() : ''}</td>
+                        <td style="color:var(--danger); font-weight:700;">${e.credit > 0 ? e.credit.toLocaleString() : ''}</td>
+                    </tr>
+                `;
+                currentGroup = e.tx_group_id;
+            });
+            body.innerHTML = html;
+        } catch(e) {
+            body.innerHTML = '<tr><td colspan="5" class="text-dim text-center">⚠️ تعذر تحميل القيود. تأكد من تشغيل السيرفر.</td></tr>';
+            console.error('loadJournalEntries error:', e);
+        }
+    }
+
+    function switchAcctTab(tab) {
+        document.querySelectorAll('.acct-pane').forEach(p => p.style.display = 'none');
+        document.querySelectorAll('.acct-tab').forEach(t => t.classList.remove('active'));
+        document.getElementById(`acct-${tab}`).style.display = 'block';
+        document.getElementById(`tab-${tab}`).classList.add('active');
+        if(tab === 'ledger') renderStandardLedger();
+        if(tab === 'trial') renderTrialBalance();
+        if(tab === 'reports') renderStandardReports();
+    }
+
+    async function getProcessedLedger() {
+        const res = await fetch('/api/finance/journal');
+        const entries = await res.json();
+        const ledger = {};
+        acctState.accounts.forEach(a => ledger[a] = { debits: [], credits: [], balance: 0 });
+        
+        entries.forEach(e => {
+            if (ledger[e.account_name]) {
+                if (e.debit > 0) ledger[e.account_name].debits.push(e);
+                if (e.credit > 0) ledger[e.account_name].credits.push(e);
+            }
+        });
+        
+        for (let acc in ledger) {
+            const dSum = ledger[acc].debits.reduce((sum, e) => sum + e.debit, 0);
+            const cSum = ledger[acc].credits.reduce((sum, e) => sum + e.credit, 0);
+            ledger[acc].balance = dSum - cSum;
+            ledger[acc].totalDebit = dSum;
+            ledger[acc].totalCredit = cSum;
+        }
+        return ledger;
+    }
+
+    async function renderStandardLedger() {
+        const grid = document.getElementById('ledger-grid');
+        grid.innerHTML = "<p class='text-dim'>جاري تلخيص الحسابات...</p>";
+        const ledger = await getProcessedLedger();
+        
+        let html = "";
+        for (let acc in ledger) {
+            const data = ledger[acc];
+            if (data.debits.length === 0 && data.credits.length === 0) continue;
+            
+            html += `
+                <div class="t-account">
+                    <div class="t-account-header">${acc}</div>
+                    <div class="t-account-body">
+                        <div class="t-side debit">
+                            <small class="text-dim">مدين (Debits)</small>
+                            ${data.debits.map(e => `<div class="t-row"><span>${e.tx_date}</span> <b>${e.debit.toLocaleString()}</b></div>`).join('')}
+                        </div>
+                        <div class="t-side credit">
+                            <small class="text-dim">دائن (Credits)</small>
+                            ${data.credits.map(e => `<div class="t-row"><span>${e.tx_date}</span> <b>${e.credit.toLocaleString()}</b></div>`).join('')}
+                        </div>
+                    </div>
+                    <div class="t-footer">
+                        <span>الرصيد النهائي:</span>
+                        <span style="color:${data.balance >= 0 ? 'var(--success)' : 'var(--danger)'}">${Math.abs(data.balance).toLocaleString()} ${data.balance >= 0 ? '(مدين)' : '(دائن)'}</span>
+                    </div>
+                </div>
+            `;
+        }
+        grid.innerHTML = html || "<p class='text-dim text-center' style='grid-column:1/-1;'>لا توجد بيانات مرحلة لدفتر الأستاذ بعد.</p>";
+    }
+
+    async function renderTrialBalance() {
+        const body = document.getElementById('trialBalanceBody');
+        body.innerHTML = "<tr><td colspan='3'>جاري الفحص...</td></tr>";
+        const ledger = await getProcessedLedger();
+        
+        let html = "";
+        let totalD = 0; let totalC = 0;
+        for (let acc in ledger) {
+            const bal = ledger[acc].balance;
+            if (bal === 0) continue;
+            const d = bal > 0 ? bal : 0;
+            const c = bal < 0 ? Math.abs(bal) : 0;
+            totalD += d; totalC += c;
+            html += `
+                <tr>
+                    <td>${acc}</td>
+                    <td style="text-align:center;">${d ? d.toLocaleString() : '-'}</td>
+                    <td style="text-align:center;">${c ? c.toLocaleString() : '-'}</td>
+                </tr>
+            `;
+        }
+        html += `
+            <tr class="total-row">
+                <td>الإجمالي</td>
+                <td style="text-align:center;">${totalD.toLocaleString()}</td>
+                <td style="text-align:center;">${totalC.toLocaleString()}</td>
+            </tr>
+        `;
+        body.innerHTML = html;
+    }
+
+    async function renderStandardReports() {
+        const container = document.getElementById('reports-content');
+        container.innerHTML = "<p class='text-dim'>جاري استخراج القوائم...</p>";
+        const ledger = await getProcessedLedger();
+        const res = await fetch('/api/finance/journal');
+        const allEntries = await res.json();
+        
+        // Calculate Yearly Distribution
+        const monthlyStats = acctState.months.map((m, i) => {
+            const mEntries = allEntries.filter(e => new Date(e.tx_date).getMonth() === i);
+            const revenues = mEntries.filter(e => ["المبيعات", "إيرادات أخرى"].includes(e.account_name)).reduce((s,e) => s + e.credit, 0);
+            const expenses = mEntries.filter(e => ["المشتريات", "مصروف الرواتب", "مصروف الإيجار", "مصروف الاندثار", "مصاريف عمومية"].includes(e.account_name)).reduce((s,e) => s + (e.debit || 0), 0);
+            return { name: m, rev: revenues, exp: expenses, profit: revenues - expenses };
+        });
+
+        // Simplified Logic for IFRS reports
+        const rev = (ledger["المبيعات"]?.balance || 0) * -1 + (ledger["إيرادات أخرى"]?.balance || 0) * -1;
+        const cogs = (ledger["المشتريات"]?.balance || 0);
+        const exp = (ledger["مصروف الرواتب"]?.balance || 0) + (ledger["مصروف الإيجار"]?.balance || 0) + (ledger["مصروف الاندثار"]?.balance || 0) + (ledger["مصاريف عمومية"]?.balance || 0);
+        const netProfit = rev - cogs - exp;
+
+        container.innerHTML = `
+            <div style="grid-column: 1 / -1; background: var(--surface); padding: 20px; border-radius: var(--radius); border: 1px solid var(--border); margin-bottom: 20px;">
+                <h4 class="mb-20">📅 ملخص الأداء الموزع على شهور السنة (2026)</h4>
+                <div style="overflow-x:auto;">
+                    <table class="finance-table" style="font-size:0.8rem; text-align:center;">
+                        <thead>
+                            <tr><th>الشهر</th><th>الإيرادات</th><th>المصروفات</th><th>صافي الربح</th><th>الحالة</th></tr>
+                        </thead>
+                        <tbody>
+                            ${monthlyStats.map(s => `
+                                <tr>
+                                    <td>${s.name}</td>
+                                    <td>${s.rev.toLocaleString()}</td>
+                                    <td>${s.exp.toLocaleString()}</td>
+                                    <td style="color:${s.profit >= 0 ? 'var(--success)' : 'var(--danger)'}; font-weight:800;">${s.profit.toLocaleString()}</td>
+                                    <td><span class="badge" style="background:${s.rev > 0 ? 'var(--success)' : 'var(--text-dim)'}; opacity:0.3; padding:2px 8px; border-radius:4px;">${s.rev > 0 ? 'مرحل' : 'مفتوح'}</span></td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="glass-card" style="padding:20px; border-color:var(--success);">
+                <h4 style="color:var(--success); margin-bottom:15px;">📊 قائمة الدخل (Income Statement)</h4>
+                <div class="summary-row"><span>إجمالي الإيرادات:</span> <b>${rev.toLocaleString()}</b></div>
+                <div class="summary-row"><span>تكلفة المبيعات:</span> <b style="color:var(--danger)">(${cogs.toLocaleString()})</b></div>
+                <div class="summary-row" style="border-top:1px solid var(--border); padding-top:5px;"><span>إجمالي الربح:</span> <b>${(rev-cogs).toLocaleString()}</b></div>
+                <div class="summary-row"><span>إجمالي المصروفات:</span> <b style="color:var(--danger)">(${exp.toLocaleString()})</b></div>
+                <div class="summary-row total" style="margin-top:10px;"><span>صافي الربح / الخسارة:</span> <b>${netProfit.toLocaleString()}</b></div>
+            </div>
+            <div class="glass-card" style="padding:20px; border-color:var(--primary);">
+                <h4 style="color:var(--primary); margin-bottom:15px;">⚖️ الميزانية العمومية (Balance Sheet)</h4>
+                <div class="summary-row"><span>إجمالي الأصول:</span> <b>${Math.max(0, (ledger["الصندوق"].balance + ledger["المصرف"].balance + ledger["المخزون"].balance + ledger["الأثاث"].balance + ledger["العقارات"].balance)).toLocaleString()}</b></div>
+                <div class="summary-row"><span>إجمالي الالتزامات:</span> <b>${Math.abs(Math.min(0, ledger["الدائنون (الموردون)"].balance + ledger["القروض"].balance)).toLocaleString()}</b></div>
+                <div class="summary-row"><span>حقوق الملكية:</span> <b>${Math.abs(Math.min(0, ledger["رأس المال"].balance - netProfit)).toLocaleString()}</b></div>
+            </div>
+        `;
+    }
+
+    // --- 6. ATM Sim ---
+    let atmBal = 5000000; let atmInput = "";
+    function atmType(v) { atmInput += v; updateAtm(); }
+    function atmClear() { atmInput = ""; updateAtm(); }
+    function updateAtm() { document.getElementById('atmDisplayInput').innerText = atmInput; document.getElementById('atmDisplayBalance').innerText = atmBal.toLocaleString() + ' د.ع'; }
+    function atmProcess(type) {
+        const val = parseInt(atmInput); if (!val) return;
+        if(type === 'withdraw' && val > atmBal) { alert("رصيد غير كافٍ."); return; }
+        if(type === 'withdraw') atmBal -= val; else atmBal += val;
+        alert("عملية ناجحة."); atmClear();
+    }
+
+    // --- 7. Professor Control ---
+    let professorUnlocked = false; let professorCode = "";
+    function openProfessorLogin() {
+        const code = prompt("أدخل رمز الأستاذ (مثلاً: 1234):");
+        if (code === "1234") { professorUnlocked = true; professorCode = code; openSimPanel('sim-professor'); loadProfessorState(); }
+        else alert("رمز خاطئ.");
+    }
+
+    // Fix: دالة كانت مفقودة — تقفل لوحة الأستاذ وترجع للقائمة الرئيسية
+    function lockProfessor() {
+        professorUnlocked = false;
+        professorCode = "";
+        closeSimPanel();
+    }
+
+    // Fix: دالة كانت مفقودة — تحدّث السوق يدوياً بنقرة واحدة
+    function refreshMarketV5() {
+        // Trigger one manual market tick
+        var econ = MarketStore.econState;
+        var inflationImpact = (econ.inflation - 2) / 5;
+        var recessionImpact = econ.recession / 3;
+        var interestImpact = (econ.interest_rate - 5) / 5;
+
+        for (var i = 0; i < MarketStore.stocks.length; i++) {
+            var s = MarketStore.stocks[i];
+            var sectorModifier = 0;
+            if(s.type === 'bank') sectorModifier += interestImpact * 1.5 - recessionImpact * 2;
+            if(s.type === 'energy') sectorModifier += inflationImpact * 1.2;
+            if(s.type === 'commodity') sectorModifier += inflationImpact * 2.0;
+
+            var volatility = s.type === 'commodity' ? 0.015 : 0.04;
+            var naturalNoise = (Math.random() - 0.48) * volatility;
+            var changeP = (naturalNoise + sectorModifier / 100);
+
+            var oldPrice = s.price;
+            s.price = Math.round(s.price * (1 + changeP));
+            if(s.price < 10) s.price = 10;
+            s.change = parseFloat(((s.price - oldPrice) / oldPrice * 100).toFixed(2));
+
+            s.history.push(s.price);
+            if (s.history.length > 30) s.history.shift();
+        }
+
+        selectAsset(MarketStore.activeIndex);
+        updateInvestorUI();
+        renderMiniTicker();
+    }
+
+    async function loadProfessorState() {
+        try {
+            const res = await fetch('/api/simulation/economy');
+            if (!res.ok) throw new Error('Server returned ' + res.status);
+            const data = await res.json();
+            if (data && !data.error) {
+                ['inflation', 'recession', 'spending', 'taxes', 'interest_rate'].forEach(k => {
+                   if(document.getElementById('sl_'+k)) document.getElementById('sl_'+k).value = data[k];
+                   if(document.getElementById('val_'+k)) document.getElementById('val_'+k).innerText = data[k] + '%';
+                });
+                updateImpactPreview();
+            }
+        } catch(e) {
+            alert('⚠️ تعذر تحميل حالة الاقتصاد من الخادم.');
+            console.error('loadProfessorState error:', e);
+        }
+    }
+
+    function updateSliderVal(k) {
+        document.getElementById('val_'+k).innerText = document.getElementById('sl_'+k).value + '%';
+        updateImpactPreview();
+    }
+
+    function updateImpactPreview() {
+        // Same logic as original
+        const grid = document.getElementById('impactPreview');
+        if(grid) grid.innerHTML = "<small class='text-dim'>جاري حساب التأثيرات الاقتصادية...</small>";
+    }
+
+    async function applyEconomyChanges() {
+        try {
+            const payload = {
+                professor_code: professorCode,
+                inflation: document.getElementById('sl_inflation').value,
+                recession: document.getElementById('sl_recession').value,
+                spending: document.getElementById('sl_spending').value,
+                taxes: document.getElementById('sl_taxes').value,
+                interest_rate: document.getElementById('sl_interest_rate').value
+            };
+            const res = await fetch('/api/simulation/economy', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
+            const d = await res.json();
+            if(d.success) {
+                alert("✅ تم تطبيق التغييرات الاقتصادية.");
+                MarketStore.econState = {
+                    inflation: parseFloat(payload.inflation),
+                    recession: parseFloat(payload.recession),
+                    spending: parseFloat(payload.spending),
+                    taxes: parseFloat(payload.taxes),
+                    interest_rate: parseFloat(payload.interest_rate)
+                };
+            } else {
+                alert('⚠️ فشل التطبيق: ' + (d.error || 'خطأ غير معروف'));
+            }
+        } catch(e) {
+            alert('❌ تعذر الاتصال بالخادم لتطبيق التغييرات.');
+            console.error('applyEconomyChanges error:', e);
+        }
+    }
+
+    // Init
+    document.addEventListener('DOMContentLoaded', () => {
+        initFiscalTimeline();
+        addCompoundRow();
+        addCompoundRow(); 
+        loadJournalEntries();
+        fetchEconomyState();
+    });
+</script>
+{% endblock %}

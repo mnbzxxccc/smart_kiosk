@@ -1,0 +1,30 @@
+<svg viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Campus Ground -->
+  <rect x="0" y="0" width="400" height="200" fill="#f1f5f9" rx="16"/>
+  
+  <!-- Buildings (Stylized) -->
+  <g class="building" id="b-admin" onclick="highlightBuilding('b-admin', 'مبنى الإدارة')">
+    <rect x="30" y="40" width="80" height="120" rx="4"/>
+    <text x="70" y="105" font-size="12" fill="#475569" text-anchor="middle" transform="rotate(-90 70 105)">الإدارة</text>
+  </g>
+  
+  <g class="building" id="b-tech" onclick="highlightBuilding('b-tech', 'الأقسام التقنية')">
+    <rect x="130" y="40" width="140" height="70" rx="4"/>
+    <text x="200" y="80" font-size="12" fill="#475569" text-anchor="middle">التقنيات</text>
+  </g>
+  
+  <g class="building" id="b-library" onclick="highlightBuilding('b-library', 'المكتبة المركزية')">
+    <rect x="130" y="125" width="65" height="35" rx="4"/>
+    <text x="162" y="147" font-size="10" fill="#475569" text-anchor="middle">المكتبة</text>
+  </g>
+  
+  <g class="building" id="b-hall" onclick="highlightBuilding('b-hall', 'القاعة الكبرى')">
+    <rect x="205" y="125" width="65" height="35" rx="4"/>
+    <text x="237" y="147" font-size="10" fill="#475569" text-anchor="middle">القاعة</text>
+  </g>
+  
+  <g class="building" id="b-lab" onclick="highlightBuilding('b-lab', 'المختبرات المركزية')">
+    <rect x="290" y="40" width="80" height="120" rx="4"/>
+    <text x="330" y="105" font-size="12" fill="#475569" text-anchor="middle" transform="rotate(90 330 105)">المختبرات</text>
+  </g>
+</svg>

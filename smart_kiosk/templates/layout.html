@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+    <title>{% block title %}البوابة الذكية — كلية صدر العراق التقني{% endblock %}</title>
+    
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;800&family=Noto+Kufi+Arabic:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Shared Styles -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <div class="kiosk-container">
+        <!-- Hamburger Button -->
+        <button class="hamburger-btn" id="hamBtn" onclick="toggleSidebar()">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar" id="mainSidebar">
+            <div class="sidebar-header">
+                <i class="fa-solid fa-graduation-cap logo-icon"></i>
+                <div class="sidebar-titles">
+                    <h1>بوابة فالديس الذكية</h1>
+                    <p>كلية صدر العراق التقني</p>
+                </div>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="{{ url_for('index') }}" class="nav-item {% if active_page == 'index' %}active{% endif %}">
+                    <i class="fa-solid fa-house"></i> <span>الرئيسية</span>
+                </a>
+
+                <!-- Group: Student Affairs -->
+                <div class="nav-group" id="groupStudent">
+                    <button class="nav-item group-trigger" onclick="toggleNavGroup(this)">
+                        <i class="fa-solid fa-user-graduate"></i> <span>الشؤون الطلابية</span>
+                        <i class="fa-solid fa-chevron-down chevron"></i>
+                    </button>
+                    <div class="group-content">
+                        <a href="{{ url_for('auth_page') }}" class="nav-sub-item">التسجيل الإلكتروني</a>
+                        <a href="{{ url_for('index') }}#results" class="nav-sub-item">النتائج والجداول</a>
+                    </div>
+                </div>
+
+                <!-- Group: Professional Training -->
+                <div class="nav-group" id="groupLaw">
+                    <button class="nav-item group-trigger" onclick="toggleNavGroup(this)">
+                        <i class="fa-solid fa-gavel"></i> <span>مختبر القانون</span>
+                        <i class="fa-solid fa-chevron-down chevron"></i>
+                    </button>
+                    <div class="group-content">
+                        <a href="{{ url_for('law_hub') }}" class="nav-sub-item">العيادة القانونية</a>
+                        <a href="{{ url_for('law_hub') }}#court" class="nav-sub-item">المحكمة الرقمية</a>
+                    </div>
+                </div>
+
+                <a href="{{ url_for('finance_hub') }}" class="nav-item {% if active_page == 'finance' %}active{% endif %}">
+                    <i class="fa-solid fa-vault"></i> <span>المختبر المالي</span>
+                </a>
+
+                <a href="{{ url_for('chat_page') }}" class="nav-item {% if active_page == 'chat' %}active{% endif %}">
+                    <i class="fa-solid fa-comments"></i> <span>المساعد الذكي</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div id="userStatusAreaSidebar">
+                    {% if session.get('student_id') %}
+                        <div class="user-badge" style="display: flex; align-items: center; gap: 10px; color: var(--accent); padding: 10px;">
+                            <i class="fa-solid fa-user-check"></i>
+                            <span>{{ session.get('student_name', 'طالب') }}</span>
+                            <a href="{{ url_for('logout') }}" style="color: var(--danger);"><i class="fa-solid fa-right-from-bracket"></i></a>
+                        </div>
+                    {% else %}
+                        <a href="{{ url_for('auth_page') }}" class="nav-item auth-btn">
+                            <i class="fa-solid fa-user-circle"></i> <span>تسجيل دخول</span>
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Wrapper -->
+        <main class="kiosk-main">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+    <!-- Shared Scripts -->
+    <script>
+        function toggleSidebar() {
+            document.getElementById('mainSidebar').classList.toggle('active');
+            const icon = document.querySelector('#hamBtn i');
+            icon.classList.toggle('fa-bars');
+            icon.classList.toggle('fa-xmark');
+        }
+
+        function toggleNavGroup(btn) {
+            const group = btn.parentElement;
+            group.classList.toggle('open');
+        }
+
+        // Close sidebar on link click (mobile)
+        document.querySelectorAll('.nav-item, .nav-sub-item').forEach(link => {
+            link.addEventListener('click', () => {
+                if (window.innerWidth <= 992) {
+                    document.getElementById('mainSidebar').classList.remove('active');
+                    const icon = document.querySelector('#hamBtn i');
+                    icon.classList.add('fa-bars');
+                    icon.classList.remove('fa-xmark');
+                }
+            });
+        });
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

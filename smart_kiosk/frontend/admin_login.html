@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل الدخول - لوحة إدارة الجامعة</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Cairo', sans-serif; background: #e2e8f0; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; overflow: hidden; }
+        
+        /* Premium Background Effect */
+        body::before { content: ''; position: absolute; width: 600px; height: 600px; background: radial-gradient(circle, rgba(30,58,138,0.2), transparent 70%); top: -100px; right: -150px; z-index: -1; filter: blur(50px); }
+        body::after { content: ''; position: absolute; width: 500px; height: 500px; background: radial-gradient(circle, rgba(217,119,6,0.15), transparent 70%); bottom: -100px; left: -100px; z-index: -1; filter: blur(40px); }
+        
+        .login-box { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(20px); padding: 4rem 3.5rem; border-radius: 30px; box-shadow: 0 25px 50px rgba(0,0,0,0.08); width: 100%; max-width: 450px; text-align: center; border: 1px solid rgba(255,255,255,1); animation: popIn 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+        @keyframes popIn { from { opacity: 0; transform: scale(0.9) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        
+        .login-box h2 { color: #0f172a; margin-bottom: 2.5rem; font-size: 1.8rem; font-weight: 800; }
+        .icon-circle { width: 80px; height: 80px; background: linear-gradient(135deg, #1e3a8a, #0f172a); border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: 0 auto 1.5rem auto; box-shadow: 0 10px 25px rgba(30,58,138,0.3); }
+        .icon-circle i { font-size: 2.5rem; color: #f59e0b; }
+        
+        input { width: 100%; padding: 16px 20px; margin-bottom: 1.5rem; border: 2px solid #e2e8f0; border-radius: 16px; font-size: 1.1rem; font-weight: 600; outline: none; background: #f8fafc; transition: 0.3s; box-sizing: border-box; color: #1e293b; }
+        input:focus { border-color: #1e3a8a; background: white; box-shadow: 0 0 0 4px rgba(30,58,138,0.1); }
+        input::placeholder { color: #94a3b8; }
+        
+        button { background: linear-gradient(90deg, #d97706, #b45309); color: white; border: none; padding: 16px; border-radius: 16px; font-size: 1.2rem; font-weight: 800; cursor: pointer; width: 100%; transition: 0.3s; box-shadow: 0 10px 20px rgba(217,119,6,0.3); margin-top: 10px; }
+        button:hover { background: linear-gradient(90deg, #b45309, #92400e); transform: translateY(-3px); box-shadow: 0 15px 25px rgba(217,119,6,0.4); }
+        
+        #errorMsg { color: #dc2626; margin-top: 1.5rem; font-weight: 700; font-size: 1rem; padding: 10px; border-radius: 10px; background: #fef2f2; display: none; }
+    </style>
+</head>
+<body>
+    <div class="login-box">
+        <div class="icon-circle">
+            <i class="fa-solid fa-shield-halved"></i>
+        </div>
+        <h2>بوابة الإدارة المركزية</h2>
+        <form id="loginForm">
+            <input type="text" id="username" placeholder="اسم المستخدم" required>
+            <input type="password" id="password" placeholder="كلمة المرور" required>
+            <button type="submit">تسجيل الدخول</button>
+        </form>
+        <div id="errorMsg"></div>
+    </div>
+    
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const u = document.getElementById('username').value;
+            const p = document.getElementById('password').value;
+            
+            const res = await fetch('/api/admin/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: u, password: p })
+            });
+            
+            const data = await res.json();
+            const errorDiv = document.getElementById('errorMsg');
+            if(data.success) {
+                window.location.href = '/admin_portal.html';
+            } else {
+                errorDiv.innerText = data.error || 'خطأ في تسجيل الدخول';
+                errorDiv.style.display = 'block';
+                // Shake effect on error
+                const box = document.querySelector('.login-box');
+                box.style.transform = 'translateX(-10px)';
+                setTimeout(()=> box.style.transform = 'translateX(10px)', 100);
+                setTimeout(()=> box.style.transform = 'translateX(-10px)', 200);
+                setTimeout(()=> box.style.transform = 'translateX(0)', 300);
+            }
+        });
+    </script>
+</body>
+</html>

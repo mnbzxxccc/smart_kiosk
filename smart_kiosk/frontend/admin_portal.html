@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم الإدارية - جامعة صدر العراق التقني</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: 'Cairo', sans-serif; background: #e2e8f0; margin: 0; padding: 0; display: flex; height: 100vh; color: #1e293b; overflow: hidden; }
+        
+        /* Premium Sidebar */
+        .sidebar { width: 300px; background: linear-gradient(180deg, #1e3a8a, #0f172a); color: white; padding: 2.5rem 1.5rem; display: flex; flex-direction: column; gap: 1rem; box-shadow: 5px 0 25px rgba(0,0,0,0.1); z-index: 10; border-radius: 0 30px 30px 0; }
+        .sidebar h2 { font-size: 1.5rem; margin-bottom: 2.5rem; text-align: center; color: #f8fafc; display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: 800; letter-spacing: -0.5px; }
+        .sidebar h2 i { color: #d97706; font-size: 2rem; }
+        
+        .nav-btn { background: rgba(255,255,255,0.05); border: 1px solid transparent; color: #cbd5e1; text-align: right; padding: 14px 20px; font-size: 1.1rem; font-weight: 600; cursor: pointer; border-radius: 14px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; align-items: center; gap: 12px; }
+        .nav-btn:hover { background: rgba(255,255,255,0.1); transform: translateX(-5px); }
+        .nav-btn.active { background: linear-gradient(90deg, #d97706, #b45309); color: white; border-color: #f59e0b; box-shadow: 0 4px 15px rgba(217, 119, 6, 0.4); transform: translateX(-5px); }
+        .nav-btn i { font-size: 1.25rem; width: 25px; text-align: center; }
+        
+        /* Premium Main Area */
+        .main-content { flex: 1; padding: 3rem 4rem; overflow-y: auto; background: #f8fafc; }
+        .panel { display: none; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); padding: 3rem; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.04); border: 1px solid #ffffff; }
+        .panel.active { display: block; animation: slideUp 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        
+        h3 { color: #0f172a; font-size: 1.8rem; font-weight: 800; margin-top: 0; margin-bottom: 2rem; display: flex; align-items: center; gap: 12px; }
+        h3::before { content: ""; display: block; width: 6px; height: 30px; background: #d97706; border-radius: 4px; }
+        
+        .form-group { margin-bottom: 1.8rem; }
+        label { display: block; margin-bottom: 10px; font-weight: 700; color: #475569; font-size: 1.1rem; }
+        input[type="text"], input[type="password"], input[type="file"] { width: 100%; padding: 14px 18px; border: 2px solid #e2e8f0; border-radius: 14px; outline: none; font-size: 1.1rem; background: #f1f5f9; transition: 0.3s; }
+        input[type="text"]:focus, input[type="password"]:focus { border-color: #1e3a8a; background: white; box-shadow: 0 0 0 4px rgba(30,58,138,0.1); }
+        
+        button.btn-primary { background: #1e3a8a; color: white; padding: 14px 30px; border: none; border-radius: 14px; font-weight: 800; font-size: 1.15rem; cursor: pointer; transition: 0.3s; box-shadow: 0 4px 15px rgba(30,58,138,0.3); display: inline-flex; align-items: center; gap: 10px; }
+        button.btn-primary:hover { background: #152c6a; transform: translateY(-3px); box-shadow: 0 6px 20px rgba(30,58,138,0.4); }
+        
+        .status-msg { margin-top: 1.5rem; padding: 1.2rem; border-radius: 12px; display: none; font-weight: 700; font-size: 1.1rem; display: flex; align-items: center; gap: 10px; }
+        .success { background: #ecfdf5; color: #065f46; border: 1px solid #10b981; }
+        .error { background: #fef2f2; color: #991b1b; border: 1px solid #ef4444; }
+
+        .excel-template-link { display: inline-flex; align-items: center; gap: 8px; margin-top: 12px; color: #0284c7; text-decoration: none; font-size: 0.95rem; font-weight: 600; padding: 8px 12px; background: #f0f9ff; border-radius: 8px; transition: 0.3s; }
+        .excel-template-link:hover { background: #e0f2fe; color: #0369a1; }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <h2><i class="fa-solid fa-building-columns"></i> إدارة الجامعة</h2>
+        <button class="nav-btn active" onclick="switchTab('dashboardPanel', this); loadStats();"><i class="fa-solid fa-chart-line"></i> لوحة البيانات (تحليلات) </button>
+        <button class="nav-btn" onclick="switchTab('resultsPanel', this)"><i class="fa-solid fa-graduation-cap"></i> رفع مجلد النتائج (Excel)</button>
+        <button class="nav-btn" onclick="switchTab('newsApprovalPanel', this); fetchPendingNews();"><i class="fa-solid fa-file-signature"></i> اعتماد المقالات</button>
+        <button class="nav-btn" onclick="switchTab('schedulesPanel', this)"><i class="fa-solid fa-calendar-days"></i> رفع الجداول (Excel)</button>
+        <button class="nav-btn" onclick="switchTab('accountPanel', this)"><i class="fa-solid fa-user-shield"></i> إعدادات الحساب</button>
+        <button class="nav-btn" onclick="logout()" style="margin-top: auto; color: #fca5a5;"><i class="fa-solid fa-right-from-bracket"></i> تسجيل الخروج</button>
+    </div>
+
+    <div class="main-content">
+        <!-- Dashboard Panel -->
+        <div id="dashboardPanel" class="panel active">
+            <h3>إحصائيات النظام الحية</h3>
+            <div class="stats-grid-admin">
+                <div class="stat-card">
+                    <i class="fa-solid fa-users"></i>
+                    <h4 id="statStudents">0</h4>
+                    <p>إجمالي الطلاب</p>
+                </div>
+                <div class="stat-card">
+                    <i class="fa-solid fa-message"></i>
+                    <h4 id="statQueries">0</h4>
+                    <p>إجمالي استفسارات اليوم</p>
+                </div>
+                <div class="stat-card">
+                    <i class="fa-solid fa-newspaper"></i>
+                    <h4 id="statNews">0</h4>
+                    <p>الأخبار المنشورة</p>
+                </div>
+            </div>
+            <div style="margin-top:40px; height: 300px;">
+                <canvas id="statsChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Results Panel -->
+        <div id="resultsPanel" class="panel">
+            <h3>إدارة نتائج الطلاب</h3>
+            <p>قم برفع ملف Excel (xlsx.) يحتوي على نتائج الطلاب لتحديث قاعدة البيانات الخاصة بالكشك.</p>
+            <div class="form-group">
+                <label>اختر ملف النتائج:</label>
+                <input type="file" id="resultsFile" accept=".xlsx">
+                <a href="#" class="excel-template-link"><i class="fa-solid fa-file-excel"></i> شكل توضيحي: (student_id, name, subject, grade, semester)</a>
+            </div>
+            <button class="btn-primary" onclick="uploadExcel('resultsFile', '/api/admin/upload/results')">رفع وتحديث النظام</button>
+            <div id="resultsStatus" class="status-msg"></div>
+        </div>
+
+        <!-- Schedules Panel -->
+        <div id="schedulesPanel" class="panel">
+            <h3>إدارة الجداول الدراسية</h3>
+            <p>قم برفع ملف Excel (xlsx.) لتحديث جداول المحاضرات لجميع الأقسام.</p>
+            <div class="form-group">
+                <label>اختر ملف الجداول:</label>
+                <input type="file" id="schedulesFile" accept=".xlsx">
+                <a href="#" class="excel-template-link"><i class="fa-solid fa-file-excel"></i> شكل توضيحي: (department, day, time, subject, instructor, room)</a>
+            </div>
+            <button class="btn-primary" onclick="uploadExcel('schedulesFile', '/api/admin/upload/schedules')">رفع وتحديث النظام</button>
+            <div id="schedulesStatus" class="status-msg"></div>
+        </div>
+
+        <!-- News Approval Panel -->
+        <div id="newsApprovalPanel" class="panel">
+            <h3>اعتماد مقالات الطلاب (المجلة الرقمية)</h3>
+            <p>المقالات التالية تم إرسالها بواسطة طلاب قسم الإعلام وتحتاج لموافقتك قبل النشر.</p>
+            <div id="pendingNewsList" style="margin-top: 20px; display: grid; gap: 15px;">
+                <!-- Pending articles injected here -->
+            </div>
+        </div>
+
+        <!-- Account Panel -->
+        <div id="accountPanel" class="panel">
+            <h3>إعدادات الأمان وحساب المدير</h3>
+            <div class="form-group">
+                <label>اسم المستخدم الجديد</label>
+                <input type="text" id="newUsername" placeholder="الاسم الجديد">
+            </div>
+            <div class="form-group">
+                <label>كلمة المرور الجديدة</label>
+                <input type="password" id="newPassword" placeholder="كلمة السر الجديدة">
+            </div>
+            <button class="btn-primary" onclick="updateCredentials()">حفظ التغييرات</button>
+            <div id="accountStatus" class="status-msg"></div>
+        </div>
+    </div>
+
+    <script>
+        // Check Auth
+        async function checkAuth() {
+            const res = await fetch('/api/admin/check_auth');
+            const data = await res.json();
+            if (!data.authenticated) {
+                window.location.href = '/admin_login.html';
+            }
+        }
+        checkAuth();
+
+        let myChart = null;
+
+        async function loadStats() {
+            try {
+                const res = await fetch('/api/admin/stats');
+                const data = await res.json();
+                
+                document.getElementById('statStudents').innerText = data.total_students || 0;
+                document.getElementById('statNews').innerText = data.total_news || 0;
+                
+                const queries = data.events?.find(e => e.event_type === 'query')?.count || 0;
+                document.getElementById('statQueries').innerText = queries;
+
+                // Chart Init
+                const ctx = document.getElementById('statsChart').getContext('2d');
+                if(myChart) myChart.destroy();
+                
+                myChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['الطلاب', 'الأخبار', 'الاستفسارات'],
+                        datasets: [{
+                            label: 'إحصائيات النظام',
+                            data: [data.total_students, data.total_news, queries],
+                            backgroundColor: ['#1e3a8a', '#d97706', '#10b981'],
+                            borderRadius: 10
+                        }]
+                    },
+                    options: { maintainAspectRatio: false }
+                });
+            } catch(e) { console.error("Stats error", e); }
+        }
+        
+        // Initial load
+        setTimeout(loadStats, 500);
+
+        function switchTab(tabId, btnElement) {
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            btnElement.classList.add('active');
+        }
+
+        async function fetchPendingNews() {
+            const list = document.getElementById('pendingNewsList');
+            list.innerHTML = "جاري التحميل...";
+            try {
+                const res = await fetch('/api/news?pending=true');
+                const data = await res.json();
+                const pending = data.filter(n => n.status === 'pending');
+                if(pending.length === 0) { list.innerHTML = "<div class='status-msg success'>لا توجد مقالات معلقة حالياً.</div>"; return; }
+                
+                let html = '';
+                pending.forEach(n => {
+                    html += `
+                    <div style="background: #f1f5f9; padding: 20px; border-radius: 14px; border: 1px solid #cbd5e1; display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <h4 style="margin:0 0 10px 0; color:#1e3a8a;">${n.title}</h4>
+                            <p style="margin:0 0 10px 0; font-size:0.9rem;">${n.content.substring(0, 100)}...</p>
+                            <small style="color:#64748b;">الكاتب: ${n.author_id} | التصنيف: ${n.category || 'عام'}</small>
+                        </div>
+                        <div style="display:flex; gap:10px;">
+                            <button class="btn-primary" style="background:#10b981; padding:8px 16px; font-size:1rem;" onclick="approveNews(${n.id})"><i class="fa-solid fa-check"></i> موافقة</button>
+                        </div>
+                    </div>`;
+                });
+                list.innerHTML = html;
+            } catch(e) { list.innerHTML = "<div class='status-msg error'>خطأ في جلب المقالات.</div>"; }
+        }
+
+        async function approveNews(id) {
+            try {
+                const res = await fetch(`/api/admin/news/approve/${id}`, { method: 'POST' });
+                const data = await res.json();
+                if(data.success) { fetchPendingNews(); loadStats(); }
+                else alert(data.error || "Failed");
+            } catch(e) { alert("Error"); }
+        }
+
+        async function logout() {
+            await fetch('/api/admin/logout');
+            window.location.href = '/admin_login.html';
+        }
+
+        async function uploadExcel(inputId, url) {
+            const fileInput = document.getElementById(inputId);
+            const statusDiv = document.getElementById(inputId.replace('File', 'Status'));
+            
+            if (fileInput.files.length === 0) {
+                statusDiv.className = 'status-msg error';
+                statusDiv.innerText = 'الرجاء اختيار ملف أولاً!';
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            statusDiv.className = 'status-msg';
+            statusDiv.innerText = 'جاري الرفع...';
+            statusDiv.style.display = 'block';
+
+            try {
+                const res = await fetch(url, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await res.json();
+                if (data.success) {
+                    statusDiv.className = 'status-msg success';
+                    statusDiv.innerText = '✅ تم رفع الملف وتحديث النظام بنجاح!';
+                    fileInput.value = '';
+                } else {
+                    throw new Error(data.error || 'خطأ أثناء الرفع');
+                }
+            } catch (err) {
+                statusDiv.className = 'status-msg error';
+                statusDiv.innerText = '❌ ' + err.message;
+            }
+        }
+
+        async function updateCredentials() {
+            const u = document.getElementById('newUsername').value;
+            const p = document.getElementById('newPassword').value;
+            const statusDiv = document.getElementById('accountStatus');
+
+            if (!u || !p) {
+                statusDiv.className = 'status-msg error';
+                statusDiv.innerText = 'الرجاء ملء جميع الحقول!';
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/admin/update_credentials', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: u, password: p })
+                });
+                
+                const data = await res.json();
+                if (data.success) {
+                    statusDiv.className = 'status-msg success';
+                    statusDiv.innerText = '✅ تم تحديث بيانات الدخول بنجاح. سيتم تسجيل خروجك.';
+                    setTimeout(logout, 2000);
+                } else {
+                    throw new Error(data.error || 'خطأ غير معروف');
+                }
+            } catch (err) {
+                statusDiv.className = 'status-msg error';
+                statusDiv.innerText = '❌ ' + err.message;
+            }
+        }
+    </script>
+</body>
+</html>
